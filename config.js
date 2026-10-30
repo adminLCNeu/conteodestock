@@ -63,13 +63,13 @@ const LOCATIONS = [
 const USERS = [
   { username: 'batodesrets', password: '100393', canDelete: true, canEditPrices: true },
   { username: 'bautista', password: '100393', canDelete: false, canEditPrices: false },
-  { username: 'agostina', password: '123456', canDelete: false, canEditPrices: false },
-  { username: 'manuel', password: '123456', canDelete: false, canEditPrices: false },
-  { username: 'simon', password: '123456', canDelete: false, canEditPrices: false },
+  { username: 'agostina', password: '123456', canDelete: false, canEditPrices: false, locations: ['BCN 2 - Moon'] },
+  { username: 'manuel', password: '123456', canDelete: false, canEditPrices: false, locations: ['BCN 1 - Space'] },
+  { username: 'simon', password: '123456', canDelete: false, canEditPrices: false, locations: ['Madrid'] },
   { username: 'julian', password: '123456', canDelete: false, canEditPrices: false },
   { username: 'malaga', password: '123456', canDelete: false, canEditPrices: false, locations: ['Málaga 1'] },
   { username: 'fabrica', password: '123456', canDelete: false, canEditPrices: false },
-  { username: 'sergio S', password: '123456', canDelete: false, canEditPrices: false },
+  { username: 'sergio S', password: '123456', canDelete: false, canEditPrices: false, locations: ['Valencia'] },
 ];
 
 if (typeof module !== 'undefined') { module.exports = { LOCATIONS, USERS }; }
