@@ -57,6 +57,9 @@ const LOCATIONS = [
 // canEditPrices: true = puede entrar a la pantalla de Precios (ver y editar
 // Precio 1 / Precio 2 de cada producto, y descargar el products.js actualizado
 // + el historial de cambios). Por ahora solo "batodesrets", tal como pediste.
+// locations (opcional): si se define, ese usuario SOLO puede contar en esas
+// sucursales (deben coincidir exactamente con un "name" de LOCATIONS). Si no
+// se define, el usuario puede contar en todas las sucursales.
 const USERS = [
   { username: 'batodesrets', password: '100393', canDelete: true, canEditPrices: true },
   { username: 'bautista', password: '100393', canDelete: false, canEditPrices: false },
@@ -64,7 +67,7 @@ const USERS = [
   { username: 'manuel', password: '123456', canDelete: false, canEditPrices: false },
   { username: 'simon', password: '123456', canDelete: false, canEditPrices: false },
   { username: 'julian', password: '123456', canDelete: false, canEditPrices: false },
-  { username: 'malaga', password: '123456', canDelete: false, canEditPrices: false },
+  { username: 'malaga', password: '123456', canDelete: false, canEditPrices: false, locations: ['Málaga 1'] },
   { username: 'fabrica', password: '123456', canDelete: false, canEditPrices: false },
   { username: 'sergio S', password: '123456', canDelete: false, canEditPrices: false },
 ];
