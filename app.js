@@ -133,6 +133,16 @@ function currentUserCanEditPrices() {
   return !!(u && u.canEditPrices);
 }
 
+// Sucursales que el usuario logueado puede contar.
+// Si el usuario tiene "locations" en config.js, se limita a esas; si no, todas.
+function allowedLocations() {
+  const u = findUser(state.currentUser);
+  if (u && Array.isArray(u.locations) && u.locations.length) {
+    return LOCATIONS.filter(l => u.locations.includes(l.name));
+  }
+  return LOCATIONS;
+}
+
 /* --- Precios (Precio 1: Madrid/Málaga · Precio 2: BCN) ---
    Los precios "base" viven horneados en products.js (price1/price2 de cada
    producto), igual que pasa con USERS en config.js. Como la app no tiene
@@ -650,7 +660,7 @@ function renderLocation() {
       </div>
       ${resumeHtml}
       <div class="loc-list" style="padding:0;">
-        ${LOCATIONS.map(loc => `
+        ${allowedLocations().map(loc => `
           <button class="loc-item ${loc.photo ? '' : 'no-photo'}" data-loc="${escapeHtml(loc.name)}">
             <div class="loc-bg" ${loc.photo ? `style="background-image:url('${escapeHtml(loc.photo)}')"` : ''}></div>
             ${!loc.photo ? `<div class="loc-building-icon">${ICONS.building}</div>` : ''}
