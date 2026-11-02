@@ -34,7 +34,7 @@ let state = {
   generalNote: '',      // nota libre opcional, cargada al preguntar por el desperdicio
   envios: {},           // { [sucursalDestino]: { counts: {code: qty}, heladoDetails: {}, boxDetails: {} } }
   envioDest: null,      // sucursal destino que se está cargando ahora (solo en stage 'envio')
-  envioGroup: 'terminados', // 'terminados' | 'materia' -- qué parte del listado de envíos se ve
+  envioGroup: 'terminados', // 'terminados' | 'materia' | 'local' -- qué parte del listado de envíos se ve
   undoStack: [],            // [{ stage, code, prevValue }] -- para el botón Deshacer
   search: '',
   activeCategory: 'Todas',
@@ -355,27 +355,40 @@ const ICE_POP_CATEGORIES = ['ICE POPS CLASSIC', 'ICE POPS SIN BAÑO', 'ICE POPS 
 // El conteo MENSUAL sigue habilitando el listado completo (todas las CATEGORIES).
 const SEMANAL_CATEGORIES = ['HELADO (KG)', ...ICE_POP_CATEGORIES];
 
-// Envíos a otras sucursales: el listado se divide en dos partes.
+// Envíos a otras sucursales: el listado se divide en tres partes.
 // Siempre se muestra completo (sin importar si el conteo es semanal o mensual),
-// porque a otra sucursal se le puede mandar cualquier producto o materia prima.
+// porque a otra sucursal se le puede mandar cualquier producto, materia prima o insumo.
 const ENVIO_GROUPS = {
   terminados: {
     label: 'Productos terminados',
+    icon: '🍦',
+    summary: (n) => `${n} terminado${n === 1 ? '' : 's'}`,
     categories: ['HELADO (KG)', ...ICE_POP_CATEGORIES, 'FRASCOS DDL', 'CANNOLIS', 'PASTELERIA'],
   },
   materia: {
     label: 'Materia prima',
+    icon: '🧪',
+    summary: (n) => `${n} de materia prima`,
     categories: [
       'DULCE DE LECHES', 'FRUTAS', 'LACTEOS', 'INSUMOS PRODUCCION', 'VARIOS PRODUCCION',
       'BARRY CALLEBAUT', 'ICAM', 'SALSAS Y VARIEGATOS BABBI', 'SALSAS Y VARIEGATOS IRCA',
       'SALSAS Y VARIEGATOS MEC 3', 'CITTÀ DEL GELATO', 'LEAGEL', 'COLORANTES',
     ],
   },
+  // Todo lo demás (conos, bebidas, café, packaging, limpieza, uniformes, etc.).
+  // No lleva lista fija: cualquier categoría que no sea de los otros dos grupos
+  // cae acá, así una categoría nueva queda disponible para envíos automáticamente.
+  local: {
+    label: 'Insumos de local',
+    icon: '🛍️',
+    summary: (n) => `${n} insumo${n === 1 ? '' : 's'} de local`,
+    categories: [],
+  },
 };
-const ENVIO_GROUP_ORDER = ['terminados', 'materia'];
+const ENVIO_GROUP_ORDER = ['terminados', 'materia', 'local'];
 
 function envioGroupOf(category) {
-  return ENVIO_GROUP_ORDER.find(g => ENVIO_GROUPS[g].categories.includes(category)) || null;
+  return ENVIO_GROUP_ORDER.find(g => ENVIO_GROUPS[g].categories.includes(category)) || 'local';
 }
 
 function isBoxCategory(category) {
@@ -1068,7 +1081,7 @@ function renderCount() {
       <div class="chips" id="envioGroupChips" style="margin-bottom:6px;">
         ${ENVIO_GROUP_ORDER.map(g => {
           const n = PRODUCTS.filter(p => envioGroupOf(p.category) === g && Number(activeCounts()[p.code] || 0) > 0).length;
-          return `<button class="chip ${state.envioGroup === g ? 'active' : ''}" data-envio-group="${g}">${g === 'terminados' ? '🍦' : '🧪'} ${ENVIO_GROUPS[g].label}${n ? ` (${n})` : ''}</button>`;
+          return `<button class="chip ${state.envioGroup === g ? 'active' : ''}" data-envio-group="${g}">${ENVIO_GROUPS[g].icon} ${ENVIO_GROUPS[g].label}${n ? ` (${n})` : ''}</button>`;
         }).join('')}
       </div>` : '';
 
@@ -1491,7 +1504,7 @@ function renderEnvioDest() {
     const n = countPositive(e && e.counts);
     const byGroup = ENVIO_GROUP_ORDER.map(g => {
       const c = PRODUCTS.filter(p => envioGroupOf(p.category) === g && Number(((e && e.counts) || {})[p.code] || 0) > 0).length;
-      return c ? `${c} ${g === 'terminados' ? 'terminado' : 'de materia prima'}${c === 1 ? '' : (g === 'terminados' ? 's' : '')}` : '';
+      return c ? ENVIO_GROUPS[g].summary(c) : '';
     }).filter(Boolean).join(' · ');
     return `
       <div class="history-item">
@@ -1516,7 +1529,7 @@ function renderEnvioDest() {
       <div class="home-hero">
         <span class="emoji">🚚</span>
         <h2>¿Hiciste envíos a otras sucursales?</h2>
-        <p>Elegí a qué sucursal mandaste y cargá los productos terminados y la materia prima</p>
+        <p>Elegí a qué sucursal mandaste y cargá los productos terminados, la materia prima y los insumos de local</p>
       </div>
       <div class="section-label">Sucursal destino</div>
       <div class="history-list">${destinos.map(destRow).join('')}</div>
@@ -1538,10 +1551,9 @@ function renderEnvioDest() {
       state.stage = 'envio';
       activeEnvio();
       const e = state.envios[state.envioDest];
-      // Si ya había cargado algo de materia prima y nada terminado, arrancamos ahí.
-      const hasTerm = PRODUCTS.some(p => envioGroupOf(p.category) === 'terminados' && Number(e.counts[p.code] || 0) > 0);
-      const hasMat = PRODUCTS.some(p => envioGroupOf(p.category) === 'materia' && Number(e.counts[p.code] || 0) > 0);
-      state.envioGroup = (!hasTerm && hasMat) ? 'materia' : 'terminados';
+      // Arrancamos en el primer grupo que ya tenga algo cargado (o en terminados si no hay nada).
+      state.envioGroup = ENVIO_GROUP_ORDER.find(g =>
+        PRODUCTS.some(p => envioGroupOf(p.category) === g && Number(e.counts[p.code] || 0) > 0)) || 'terminados';
       state.undoStack = [];
       state.search = '';
       state.activeCategory = 'Todas';
