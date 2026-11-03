@@ -24,6 +24,8 @@ const LOCATIONS = [
       90028, 90029, 90031, 90038, 90040, 90045, 90046,
       // Uniformes azules: camisas por género (se reemplazan por unisex)
       90066, 90067, 90068, 90069, 90070, 90071, 90072, 90073, 90074, 90075,
+      // Ice pops: Smile, Crema de maní s/azúcar, Sorbete de frutos rojos
+      2235, 2223, 2236,
     ],
   },
   { name: 'Madrid', photo: 'loc-madrid.jpg' },
