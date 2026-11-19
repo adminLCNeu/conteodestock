@@ -1,6 +1,6 @@
 // Listado de productos - generado desde Listado_productos_Stock.xlsx
 // Pestañas usadas: Productos terminados, Pasteleria, VARIOS
-// Total productos: 462  |  Códigos autogenerados (90001+): 158
+// Total productos: 486  |  Códigos autogenerados (90001+): 237
 //
 // price1 = precio de venta en Madrid y Málaga · price2 = precio de venta en BCN
 // Cargados desde "listas_de_precios_terminados_-_MP_-_varios.xlsx" cruzando por
@@ -474,6 +474,30 @@ const PRODUCTS = [
   { code: 90214, name: 'TARRINA M 120CC (PRINTEDCUP)', category: 'POLIPAPEL', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
   { code: 90215, name: 'TARRINA L 160CC (PRINTEDCUP)', category: 'POLIPAPEL', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
   { code: 90216, name: 'TARRINA XL (PRINTEDCUP)', category: 'POLIPAPEL', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  // Agregados 19/11/2026 desde "Stock varios.xlsx" (filas sin pintar) — solo Valencia, sin precio
+  { code: 90218, name: 'BAMBOO STIRRER 115 MM (PAQUETE)', category: 'CAPSULAS CAFÉ', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90219, name: 'VASOS DESECHABLES TRANSPARENTES (PAQUETE X50)', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90220, name: 'CUCHARAS DESECHABLES', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90221, name: 'TENEDOR DESECHABLE', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90222, name: 'CUCHILLO DESECHABLE', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90223, name: 'CUCHARITAS CUBA (CAJA 10 BOLSAS)', category: 'CUCHARAS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90224, name: 'CONO CORONA PLANA 45 (MAPROHELCO)', category: 'CUCURUCHOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90225, name: 'SALSA AROMAITALIA FRUTOS DEL BOSQUE', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90226, name: 'SALSA AROMAITALIA CARAMELO', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90227, name: 'SALSA AROMAITALIA CHOCOLATE', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90228, name: 'AGUA AQUABONA CON GAS PET 500ML', category: 'BEBIDAS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90229, name: 'AGUA AQUABONA SIN GAS PET 500ML', category: 'BEBIDAS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90230, name: 'LATA CERVEZA (PACK X24)', category: 'BEBIDAS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90231, name: 'BOLSAS DE MANI 200GR (MERCADONA)', category: 'INSUMOS PRODUCCION', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90232, name: 'PETALOS VERDES (CAJA)', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90233, name: 'CIOCCODELIZIA BABBI 500GR', category: 'SALSAS Y VARIEGATOS BABBI', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90234, name: 'ESENCIA DE VAINILLA 150ML (MERCADONA)', category: 'INSUMOS PRODUCCION', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90235, name: 'QUESO MASCARPONE 250GR (MERCADONA)', category: 'LACTEOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90236, name: 'NATA AZUCARADA KEN', category: 'LACTEOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90237, name: 'LECHE PASCUAL (PACK X8)', category: 'LACTEOS', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90238, name: 'CACAO AMARGO BARRY CALLEBAUT 1KG', category: 'BARRY CALLEBAUT', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90239, name: 'COBERTURA CALLEBAUT BLANCO 1KG', category: 'BARRY CALLEBAUT', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90240, name: 'MALTODEXTROSA MALTOSEC SOSA 500GR', category: 'INSUMOS PRODUCCION', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
 ];
 
 const CATEGORIES = [
