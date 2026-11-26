@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inventario-cache-v48';
+const CACHE_NAME = 'inventario-cache-v49';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -8,6 +8,8 @@ const FILES_TO_CACHE = [
   './products.js',
   './manifest.json',
   './xlsx.full.min.js',
+  './exceljs.min.js',
+  './excel-export.js',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-192.png',
@@ -23,7 +25,7 @@ const FILES_TO_CACHE = [
 // Archivos que cambian cuando subís una actualización: siempre se piden
 // primero a internet (así nadie queda con una versión vieja) y solo si no
 // hay conexión se usa la copia guardada en el celular.
-const NETWORK_FIRST = /\/(|index\.html|app\.js|config\.js|products\.js|style\.css|manifest\.json)$/;
+const NETWORK_FIRST = /\/(|index\.html|app\.js|excel-export\.js|config\.js|products\.js|style\.css|manifest\.json)$/;
 
 self.addEventListener('install', (event) => {
   // cache: 'reload' evita que el caché del navegador / de GitHub devuelva

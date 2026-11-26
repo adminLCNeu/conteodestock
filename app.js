@@ -1766,100 +1766,29 @@ async function shareCount(data, stockItems, wasteItems, isHistory, envioItems) {
   const modeLabel = data.mode === 'semanal' ? 'Semanal' : 'Mensual';
   const filename = `Stock ${modeLabel} - ${loc} - ${dateStr}.xlsx`;
 
-  // Valorización: Madrid/Málaga usan Precio 1, las sucursales de BCN (incluida
-  // la Fábrica BCN) usan Precio 2. Si a algún producto todavía no se le cargó
-  // precio, se deja en blanco y no suma al total (en vez de inventar un 0).
   const priceField = priceFieldForLocation(data.location);
-  const priceLabel = priceLabelForLocation(data.location);
-  const unitPriceOf = (p) => getEffectivePrice(p.code, priceField);
-
-  const header = ['Código', 'Producto', 'Categoría', 'Unidad de medida', 'Cantidad contada', 'Precio unitario (€)', 'Subtotal (€)', 'Sucursal'];
-  const wasteHeader = [...header, 'Motivo'];
-  const toRows = (items) => items.map(p => {
-    const price = unitPriceOf(p);
-    const qty = Number(p.qty);
-    return [p.code, p.name, p.category, p.unit, qty, price === null ? '' : price, price === null ? '' : Math.round(qty * price * 100) / 100, data.location];
-  });
-  const toWasteRows = (items) => items.map(p => {
-    const price = unitPriceOf(p);
-    const qty = Number(p.qty);
-    return [p.code, p.name, p.category, p.unit, qty, price === null ? '' : price, price === null ? '' : Math.round(qty * price * 100) / 100, data.location, p.note || ''];
-  });
-  const totalValorizado = (items) => items.reduce((sum, p) => {
-    const price = unitPriceOf(p);
-    return price === null ? sum : sum + Number(p.qty) * price;
-  }, 0);
-  const totalRow = (items, ncols) => {
-    const row = new Array(ncols).fill('');
-    row[4] = 'TOTAL';
-    row[6] = Math.round(totalValorizado(items) * 100) / 100;
-    return row;
-  };
-  const missingPriceCount = (items) => items.filter(p => unitPriceOf(p) === null).length;
-  const infoRows = (sheetLabel, items) => {
-    const rows = [
-      [`Generado por: ${data.generatedBy || '—'}`],
-      [`Sucursal: ${data.location}    Conteo: ${modeLabel}    Fecha: ${fmtDate(data.finishedAt)}    Pestaña: ${sheetLabel}`],
-      [`Valorizado con: ${priceLabel}`],
-    ];
-    const missing = missingPriceCount(items);
-    if (missing > 0) rows.push([`⚠ ${missing} producto(s) sin precio cargado (no se incluyen en el total)`]);
-    if (data.generalNote && data.generalNote.trim()) rows.push([`Nota: ${data.generalNote.trim()}`]);
-    rows.push([]);
-    return rows;
-  };
 
   let shared = false;
 
-  if (typeof XLSX === 'undefined') {
+  if (typeof ExcelJS === 'undefined' || typeof buildStockWorkbook === 'undefined') {
     toast('La app todavía está terminando de cargar. Esperá unos segundos y probá de nuevo.');
     return;
   }
 
   try {
-    const wb = XLSX.utils.book_new();
-
-    const wsStock = XLSX.utils.aoa_to_sheet([...infoRows('Stock', stockItems), header, ...toRows(stockItems), totalRow(stockItems, header.length)]);
-    wsStock['!cols'] = [{ wch: 9 }, { wch: 34 }, { wch: 24 }, { wch: 14 }, { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 16 }];
-    XLSX.utils.book_append_sheet(wb, wsStock, 'Stock');
-
-    if (wasteItems.length > 0) {
-      const wsWaste = XLSX.utils.aoa_to_sheet([...infoRows('Desperdicio', wasteItems), wasteHeader, ...toWasteRows(wasteItems), totalRow(wasteItems, wasteHeader.length)]);
-      wsWaste['!cols'] = [{ wch: 9 }, { wch: 34 }, { wch: 24 }, { wch: 14 }, { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 16 }, { wch: 28 }];
-      XLSX.utils.book_append_sheet(wb, wsWaste, 'Desperdicio');
-    }
-
-    if (envioItems.length > 0) {
-      // Pestaña Envíos: una fila por producto y sucursal destino, con subtotal
-      // por destino y un total general al final. Se valoriza con el mismo
-      // precio que el resto del Excel (el de la sucursal de origen).
-      const envioHeader = ['Código', 'Producto', 'Categoría', 'Tipo', 'Unidad de medida', 'Cantidad enviada', 'Precio unitario (€)', 'Subtotal (€)', 'Origen', 'Destino'];
-      const envioRows = [];
-      const dests = [...new Set(envioItems.map(p => p.destino))];
-      dests.forEach(dest => {
-        const items = envioItems.filter(p => p.destino === dest);
-        items.forEach(p => {
-          const price = unitPriceOf(p);
-          const qty = Number(p.qty);
-          envioRows.push([p.code, p.name, p.category, ENVIO_GROUPS[p.grupo].label, p.unit, qty,
-            price === null ? '' : price, price === null ? '' : Math.round(qty * price * 100) / 100, data.location, dest]);
-        });
-        const sub = new Array(envioHeader.length).fill('');
-        sub[5] = `TOTAL → ${dest}`;
-        sub[7] = Math.round(totalValorizado(items) * 100) / 100;
-        envioRows.push(sub);
-        envioRows.push([]);
-      });
-      const grand = new Array(envioHeader.length).fill('');
-      grand[5] = 'TOTAL ENVÍOS';
-      grand[7] = Math.round(totalValorizado(envioItems) * 100) / 100;
-      envioRows.push(grand);
-      const wsEnvios = XLSX.utils.aoa_to_sheet([...infoRows('Envíos', envioItems), envioHeader, ...envioRows]);
-      wsEnvios['!cols'] = [{ wch: 9 }, { wch: 34 }, { wch: 24 }, { wch: 20 }, { wch: 14 }, { wch: 18 }, { wch: 18 }, { wch: 14 }, { wch: 16 }, { wch: 16 }];
-      XLSX.utils.book_append_sheet(wb, wsEnvios, 'Envíos');
-    }
-
-    const wbout = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    // El formato del Excel (Resumen, Stock, Desperdicio y Envíos) se arma en excel-export.js.
+    // Valorización: Madrid/Málaga usan Precio 1, las sucursales de BCN (incluida
+    // la Fábrica BCN) usan Precio 2. Si a algún producto todavía no se le cargó
+    // precio, queda marcado "sin precio" y no suma al total.
+    const wb = buildStockWorkbook(data, stockItems, wasteItems, envioItems, {
+      ExcelJS,
+      categories: CATEGORIES,
+      priceOf: (p) => getEffectivePrice(p.code, priceField),
+      priceLabel: priceLabelForLocation(data.location),
+      fmtDate,
+      envioGroupLabel: (g) => ENVIO_GROUPS[g].label,
+    });
+    const wbout = await wb.xlsx.writeBuffer();
     const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const file = new File([blob], filename, { type: blob.type });
 
@@ -1880,7 +1809,14 @@ async function shareCount(data, stockItems, wasteItems, isHistory, envioItems) {
       }
     }
     if (!usedShare) {
-      XLSX.writeFile(wb, filename);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
       toast('Se descargó el Excel a tu dispositivo (no se pudo compartir directo).');
     }
     shared = true;

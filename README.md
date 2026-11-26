@@ -11,6 +11,10 @@ App web (PWA) para contar stock (y desperdicio, si hubo) desde el celular, sucur
 
 *(el resto de los archivos — `index.html`, `manifest.json`, `service-worker.js`, `icons/`, `style.css` — no cambiaron en esta actualización)*
 
+## Formato del Excel
+
+El Excel exportado se arma en `excel-export.js` (con la librería `exceljs.min.js`) y trae: pestaña **Resumen** (cifras principales y totales por categoría), **Stock**, **Desperdicio** y **Envíos** (estas dos solo si hubo). Encabezados de color, filas fijas arriba, filtros, productos sin precio marcados en amarillo y listo para imprimir en A4.
+
 ## Valorización automática del stock
 
 Cada producto tiene dos precios de venta:
