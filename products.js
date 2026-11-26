@@ -283,9 +283,9 @@ const PRODUCTS = [
   { code: 90020, name: 'PELUCHES ENZO', category: 'VARIOS', unit: 'Unidad', avgWeight: null, price1: 4.16, price2: 4.16 },
   { code: 90021, name: 'BOLSA BASURA BLANCA', category: 'ARTICULOS DE LIMPIEZA', unit: 'Unidad', avgWeight: null, price1: null, price2: null },
   { code: 90022, name: 'BOLSA BASURA NEGRA', category: 'ARTICULOS DE LIMPIEZA', unit: 'Unidad', avgWeight: null, price1: null, price2: null },
-  { code: 90023, name: 'GUANTES S (100und.)', category: 'ARTICULOS DE LIMPIEZA', unit: 'Caja', avgWeight: null, price1: null, price2: null },
-  { code: 90024, name: 'GUANTES M (100und.)', category: 'ARTICULOS DE LIMPIEZA', unit: 'Caja', avgWeight: null, price1: null, price2: null },
-  { code: 90025, name: 'GUANTES L (100und.)', category: 'ARTICULOS DE LIMPIEZA', unit: 'Caja', avgWeight: null, price1: null, price2: null },
+  { code: 90023, name: 'GUANTES S (UNIDADES)', category: 'ARTICULOS DE LIMPIEZA', unit: 'Unidad', avgWeight: null, price1: null, price2: null },
+  { code: 90024, name: 'GUANTES M (UNIDADES)', category: 'ARTICULOS DE LIMPIEZA', unit: 'Unidad', avgWeight: null, price1: null, price2: null },
+  { code: 90025, name: 'GUANTES L (UNIDADES)', category: 'ARTICULOS DE LIMPIEZA', unit: 'Unidad', avgWeight: null, price1: null, price2: null },
   { code: 90026, name: 'PAPEL DE MANOS', category: 'ARTICULOS DE LIMPIEZA', unit: 'Unidad', avgWeight: null, price1: null, price2: null },
   { code: 90027, name: 'PAPEL HIGIENICO', category: 'ARTICULOS DE LIMPIEZA', unit: 'Unidad', avgWeight: null, price1: null, price2: null },
   { code: 90028, name: 'PRODUCTO WC', category: 'ARTICULOS DE LIMPIEZA', unit: 'Litro', avgWeight: null, price1: null, price2: null },
@@ -497,6 +497,11 @@ const PRODUCTS = [
   { code: 90238, name: 'CACAO AMARGO BARRY CALLEBAUT 1KG', category: 'BARRY CALLEBAUT', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
   { code: 90239, name: 'COBERTURA CALLEBAUT BLANCO 1KG', category: 'BARRY CALLEBAUT', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
   { code: 90240, name: 'MALTODEXTROSA MALTOSEC SOSA 500GR', category: 'INSUMOS PRODUCCION', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Valencia'] },
+  { code: 90241, name: 'CAFÉ SOLUBLE', category: 'INSUMOS PRODUCCION', unit: 'Kg', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
+  { code: 90242, name: 'MANTECA DE CACAO (ICAM)', category: 'ICAM', unit: 'Kg', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
+  { code: 90243, name: 'CURCUMA 0,1 LT', category: 'COLORANTES', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
+  { code: 90244, name: 'CARMIN 0,1 LT', category: 'COLORANTES', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
+  { code: 90245, name: 'DERMO FOAM CLEAN PLUS 0,5 LT', category: 'ARTICULOS DE LIMPIEZA', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
 ];
 
 const CATEGORIES = [
