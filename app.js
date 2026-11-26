@@ -582,7 +582,7 @@ function renderLogin() {
         ${viewToggleButtonHtml()}
       </div>
       <div class="login-top">
-        <img class="login-logo" src="logo-luccianos.png" alt="Lucciano’s">
+        <img class="login-logo" src="logo-luccianos.svg" alt="Lucciano’s">
       </div>
       <div class="login-panel">
         <h1 class="login-title">Conteo de inventario</h1>
