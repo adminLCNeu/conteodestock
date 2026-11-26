@@ -556,66 +556,30 @@ function render() {
 
 /* ---------------- Login screen ---------------- */
 
-// Ilustración de la pantalla de ingreso: una vitrina de heladería vista desde arriba.
-// Cada cubeta tiene su sabor, su textura y su cartelito.
-function loginVitrinaSvg() {
-  const flavors = [
-    { n: 'Pistacho',       c: '#A3C173', d: '#7DA655', top: 'crumbs', tc: '#4E7A2C' },
-    { n: 'Frutilla',       c: '#F2909F', d: '#E2677D', top: 'dots',   tc: '#C23B57' },
-    { n: 'Limón',          c: '#F6DE70', d: '#E8C94A', top: 'zest',   tc: '#C9A81F' },
-    { n: 'Chocolate',      c: '#74463A', d: '#4F2C24', top: 'chips',  tc: '#2B1612' },
-    { n: 'Dulce de leche', c: '#DDA662', d: '#C4883F', top: 'ribbon', tc: '#8B5A22' },
-    { n: 'Stracciatella',  c: '#FBF3E2', d: '#EADDBF', top: 'chips',  tc: '#4A2E26' },
-  ];
-  const W = 104, H = 84, GAP = 8, X0 = 16, Y0 = 26;
-  const toppings = {
-    crumbs: (x, y, c) => [[24,20,-20],[70,30,15],[44,46,40],[82,16,-35],[18,50,10],[62,52,-15]]
-      .map(([dx,dy,r]) => `<rect x="${x+dx}" y="${y+dy}" width="7" height="3.5" rx="1.5" fill="${c}" transform="rotate(${r} ${x+dx+3} ${y+dy+2})"/>`).join(''),
-    dots: (x, y, c) => [[26,24],[74,22],[50,44],[84,50],[20,48]]
-      .map(([dx,dy]) => `<circle cx="${x+dx}" cy="${y+dy}" r="3.6" fill="${c}"/>`).join(''),
-    zest: (x, y, c) => [[22,22],[60,18],[80,40],[34,46],[70,54]]
-      .map(([dx,dy]) => `<path d="M${x+dx} ${y+dy} q5 -5 10 0" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/>`).join(''),
-    chips: (x, y, c) => [[22,20,10],[56,26,-30],[80,18,25],[30,48,-10],[72,46,40],[48,14,0]]
-      .map(([dx,dy,r]) => `<ellipse cx="${x+dx}" cy="${y+dy}" rx="4.5" ry="2.4" fill="${c}" transform="rotate(${r} ${x+dx} ${y+dy})"/>`).join(''),
-    ribbon: (x, y, c) => `<path d="M${x+14} ${y+24} q12 -12 24 0 t24 0 t24 0" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round" opacity=".75"/>`,
-  };
-  const pans = flavors.map((f, i) => {
-    const col = i % 3, row = Math.floor(i / 3);
-    const x = X0 + col * (W + GAP), y = Y0 + row * (H + GAP);
-    const ix = x + 5, iy = y + 5, iw = W - 10, ih = H - 10;
-    const swirl = [0, 1, 2].map(k =>
-      `<path d="M${ix + 8} ${iy + 14 + k * 17} q11 -8 22 0 t22 0 t22 0 t22 0" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="3.2" stroke-linecap="round"/>`).join('');
-    const tagW = f.n.length * 5.7 + 16;
-    return `
-    <g class="vt-pan" style="--i:${i}">
-      <rect x="${x}" y="${y}" width="${W}" height="${H}" rx="11" class="vt-rim"/>
-      <rect x="${ix}" y="${iy}" width="${iw}" height="${ih}" rx="7" fill="${f.d}"/>
-      <rect x="${ix}" y="${iy}" width="${iw}" height="${ih - 3}" rx="7" fill="${f.c}"/>
-      ${swirl}
-      ${toppings[f.top](x, y, f.tc)}
-      <rect x="${x + W / 2 - tagW / 2}" y="${y + H - 28}" width="${tagW}" height="17" rx="8.5" fill="#FFFDF7" fill-opacity=".96"/>
-      <text x="${x + W / 2}" y="${y + H - 16}" text-anchor="middle" class="vt-label">${f.n}</text>
-    </g>`;
-  }).join('');
-  return `<svg class="login-vitrina-svg" viewBox="0 0 360 232" role="img" aria-label="Cubetas de helado de distintos sabores vistas desde arriba">${pans}</svg>`;
-}
-
 const LOGIN_EYE = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 const LOGIN_EYE_OFF = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0112 5c6.4 0 10 7 10 7a17 17 0 01-3.2 4.1M6.5 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.4 4.5-1"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg>';
 
+let loginSlideTimer = null;
+
 function renderLogin() {
+  // Fotos reales de las sucursales (la de la Fábrica es un banner angosto, no sirve de portada).
+  const slides = LOCATIONS.filter(l => l.photo && !/fabrica/i.test(l.photo));
   app.innerHTML = `
     <div class="login">
-      <div class="login-vitrina">
+      <div class="login-hero">
+        ${slides.map((l, i) => `
+          <div class="login-slide${i === 0 ? ' on' : ''}" style="background-image:url('${escapeHtml(l.photo)}')">
+            <span class="login-slide-cap">${escapeHtml(l.name)}</span>
+          </div>`).join('')}
+        <img class="login-logo" src="logo-luccianos.png" alt="Lucciano’s">
         <div class="login-tools">
           ${themeToggleButtonHtml()}
           ${viewToggleButtonHtml()}
         </div>
-        ${loginVitrinaSvg()}
       </div>
       <div class="login-sheet">
-        <h1 class="login-brand">Lucciano’s</h1>
-        <p class="login-sub">Conteo de inventario</p>
+        <h1 class="login-title">Conteo de inventario</h1>
+        <p class="login-sub">Ingresá con tu usuario y contraseña</p>
         <form class="login-form" id="loginForm" novalidate>
           <input class="login-input" type="text" id="loginUser" placeholder="Usuario" aria-label="Usuario"
             autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
@@ -630,6 +594,20 @@ function renderLogin() {
       </div>
     </div>
   `;
+
+  // Las fotos van cambiando solas (si la persona pidió menos movimiento, queda la primera).
+  clearInterval(loginSlideTimer);
+  const slideEls = [...document.querySelectorAll('.login-slide')];
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (slideEls.length > 1 && !reduceMotion) {
+    let cur = 0;
+    loginSlideTimer = setInterval(() => {
+      if (!document.body.contains(slideEls[0])) { clearInterval(loginSlideTimer); return; }
+      slideEls[cur].classList.remove('on');
+      cur = (cur + 1) % slideEls.length;
+      slideEls[cur].classList.add('on');
+    }, 4500);
+  }
 
   document.getElementById('themeToggleBtn').onclick = toggleTheme;
   document.getElementById('viewToggleBtn').onclick = toggleViewMode;

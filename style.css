@@ -813,51 +813,60 @@ input{font-family:inherit;}
 
 
 /* ============================================================
-   Pantalla de ingreso: vitrina de heladería vista desde arriba
+   Pantalla de ingreso: logo oficial sobre fotos de las sucursales
    ============================================================ */
 .login{
-  --tray:#DCE2E7;
-  --pan-rim:#C6CED5;
-  --pan-rim-line:#9AA6B0;
   min-height:100vh;
   min-height:100dvh;
   display:flex;
   flex-direction:column;
-  background:var(--tray);
+  background:#0E0E10; /* mismo negro que el logo */
 }
-:root[data-theme="dark"] .login{
-  --tray:#25292D;
-  --pan-rim:#4A5157;
-  --pan-rim-line:#626B73;
-}
-.login-vitrina{
+.login-hero{
   position:relative;
-  padding:calc(max(10px, env(safe-area-inset-top)) + 54px) 0 44px;
-  display:flex;
-  justify-content:center;
+  height:clamp(270px, 42dvh, 360px);
+  overflow:hidden;
+  background:#0E0E10;
 }
-.login-vitrina-svg{
-  display:block;
-  width:100%;
-  max-width:440px;
-  height:auto;
-}
-.vt-rim{fill:var(--pan-rim);stroke:var(--pan-rim-line);stroke-width:1.2;}
-.vt-label{
-  font:700 10px/1 var(--sans);
-  fill:#2A2022;
-  letter-spacing:.01em;
-}
-.vt-pan{
+.login-slide{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
   opacity:0;
-  transform:translateY(10px) scale(.94);
-  transform-box:fill-box;
-  transform-origin:center;
-  animation:vtIn .6s cubic-bezier(.2,.8,.2,1) forwards;
-  animation-delay:calc(var(--i) * 70ms + 60ms);
+  transition:opacity 1.2s ease;
 }
-@keyframes vtIn{to{opacity:1;transform:none;}}
-
+.login-slide.on{opacity:1;}
+.login-slide::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, rgba(14,14,16,.62) 0%, rgba(14,14,16,.5) 45%, rgba(14,14,16,.9) 100%);
+}
+.login-logo{
+  position:absolute;
+  left:50%;
+  top:46%;
+  transform:translate(-50%,-50%);
+  width:min(64vw, 270px);
+  height:auto;
+  filter:drop-shadow(0 2px 14px rgba(0,0,0,.45));
+  z-index:1;
+}
+.login-slide-cap{
+  position:absolute;
+  z-index:1;
+  left:20px;
+  bottom:46px;
+  padding:6px 12px;
+  font-size:12.5px;
+  font-weight:600;
+  color:#fff;
+  background:rgba(14,14,16,.5);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+  border-radius:999px;
+}
 .login-tools{
   position:absolute;
   top:max(10px, env(safe-area-inset-top));
@@ -872,12 +881,12 @@ input{font-family:inherit;}
   border-radius:12px;
   display:grid;
   place-items:center;
-  color:var(--ink);
-  background:color-mix(in srgb, var(--cream) 82%, transparent);
+  color:#fff;
+  background:rgba(14,14,16,.42);
   -webkit-backdrop-filter:blur(8px);
   backdrop-filter:blur(8px);
 }
-.login-tools .icon-btn:active{background:var(--cream);}
+.login-tools .icon-btn:active{background:rgba(14,14,16,.7);}
 
 .login-sheet{
   flex:1;
@@ -891,18 +900,17 @@ input{font-family:inherit;}
   max-width:600px;
   align-self:center;
 }
-.login-brand{
+.login-title{
   margin:0;
-  font-family:var(--display);
-  font-weight:600;
-  font-size:44px;
-  line-height:1.05;
-  letter-spacing:-.02em;
-  color:var(--accent-text);
+  font-size:26px;
+  line-height:1.15;
+  font-weight:700;
+  letter-spacing:-.015em;
+  color:var(--ink);
 }
 .login-sub{
-  margin:6px 0 26px;
-  font-size:16px;
+  margin:6px 0 24px;
+  font-size:15px;
   color:var(--ink-soft);
 }
 .login-form{display:flex;flex-direction:column;gap:12px;}
@@ -964,6 +972,6 @@ input{font-family:inherit;}
   80%{transform:translateX(3px);}
 }
 @media (prefers-reduced-motion:reduce){
-  .vt-pan{animation:none;opacity:1;transform:none;}
+  .login-slide{transition:none;}
   .shake{animation:none;}
 }

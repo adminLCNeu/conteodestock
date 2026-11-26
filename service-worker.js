@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inventario-cache-v50';
+const CACHE_NAME = 'inventario-cache-v51';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const FILES_TO_CACHE = [
   './exceljs.min.js',
   './excel-export.js',
   './icon-192.png',
+  './logo-luccianos.png',
   './icon-512.png',
   './icon-maskable-192.png',
   './icon-maskable-512.png',
