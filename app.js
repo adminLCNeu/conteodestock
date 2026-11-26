@@ -556,6 +556,8 @@ function render() {
 
 /* ---------------- Login screen ---------------- */
 
+const LOGIN_USER = '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
+const LOGIN_LOCK = '<svg class="icon-svg" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg>';
 const LOGIN_EYE = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 const LOGIN_EYE_OFF = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0112 5c6.4 0 10 7 10 7a17 17 0 01-3.2 4.1M6.5 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.4 4.5-1"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg>';
 
@@ -566,26 +568,33 @@ function renderLogin() {
   const slides = LOCATIONS.filter(l => l.photo && !/fabrica/i.test(l.photo));
   app.innerHTML = `
     <div class="login">
-      <div class="login-hero">
+      <div class="login-bg">
         ${slides.map((l, i) => `
           <div class="login-slide${i === 0 ? ' on' : ''}" style="background-image:url('${escapeHtml(l.photo)}')">
             <span class="login-slide-cap">${escapeHtml(l.name)}</span>
           </div>`).join('')}
-        <img class="login-logo" src="logo-luccianos.png" alt="Lucciano’s">
-        <div class="login-tools">
-          ${themeToggleButtonHtml()}
-          ${viewToggleButtonHtml()}
-        </div>
       </div>
-      <div class="login-sheet">
+      <div class="login-tools">
+        ${themeToggleButtonHtml()}
+        ${viewToggleButtonHtml()}
+      </div>
+      <div class="login-top">
+        <img class="login-logo" src="logo-luccianos.png" alt="Lucciano’s">
+      </div>
+      <div class="login-panel">
         <h1 class="login-title">Conteo de inventario</h1>
         <p class="login-sub">Ingresá con tu usuario y contraseña</p>
         <form class="login-form" id="loginForm" novalidate>
-          <input class="login-input" type="text" id="loginUser" placeholder="Usuario" aria-label="Usuario"
-            autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
-          <div class="login-pass">
-            <input class="login-input" type="password" id="loginPass" placeholder="Contraseña" aria-label="Contraseña"
-              autocomplete="current-password">
+          <div class="login-field">
+            <span class="login-ico">${LOGIN_USER}</span>
+            <input class="login-input" type="text" id="loginUser" placeholder=" "
+              autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+            <label class="login-label" for="loginUser">Usuario</label>
+          </div>
+          <div class="login-field">
+            <span class="login-ico">${LOGIN_LOCK}</span>
+            <input class="login-input" type="password" id="loginPass" placeholder=" " autocomplete="current-password">
+            <label class="login-label" for="loginPass">Contraseña</label>
             <button type="button" class="login-eye" id="loginEye" aria-label="Mostrar contraseña">${LOGIN_EYE}</button>
           </div>
           <p class="login-error" id="loginError" role="alert" hidden></p>
