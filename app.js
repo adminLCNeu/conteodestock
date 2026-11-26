@@ -575,7 +575,10 @@ function renderLogin() {
           </div>`).join('')}
       </div>
       <div class="login-tools">
-        ${themeToggleButtonHtml()}
+        <div class="login-theme" role="group" aria-label="Modo de pantalla">
+          <button type="button" id="themeDayBtn" class="${getTheme() === 'dark' ? '' : 'on'}" aria-pressed="${getTheme() !== 'dark'}">${ICONS.sun}Día</button>
+          <button type="button" id="themeNightBtn" class="${getTheme() === 'dark' ? 'on' : ''}" aria-pressed="${getTheme() === 'dark'}">${ICONS.moon}Noche</button>
+        </div>
         ${viewToggleButtonHtml()}
       </div>
       <div class="login-top">
@@ -618,7 +621,8 @@ function renderLogin() {
     }, 4500);
   }
 
-  document.getElementById('themeToggleBtn').onclick = toggleTheme;
+  document.getElementById('themeDayBtn').onclick = () => { applyTheme('light'); render(); };
+  document.getElementById('themeNightBtn').onclick = () => { applyTheme('dark'); render(); };
   document.getElementById('viewToggleBtn').onclick = toggleViewMode;
 
   const form = document.getElementById('loginForm');
