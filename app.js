@@ -570,7 +570,7 @@ function renderLogin() {
     <div class="login">
       <div class="login-bg">
         ${slides.map((l, i) => `
-          <div class="login-slide${i === 0 ? ' on' : ''}" style="background-image:url('${escapeHtml(l.photo)}')">
+          <div class="login-slide${i === 0 ? ' on' : ''}" style="background-image:url('${escapeHtml(l.photo.replace('loc-', 'hero-'))}')">
             <span class="login-slide-cap">${escapeHtml(l.name)}</span>
           </div>`).join('')}
       </div>

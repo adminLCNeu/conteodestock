@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inventario-cache-v51';
+const CACHE_NAME = 'inventario-cache-v52';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -15,6 +15,11 @@ const FILES_TO_CACHE = [
   './icon-512.png',
   './icon-maskable-192.png',
   './icon-maskable-512.png',
+  './hero-bcn1.jpg',
+  './hero-bcn2.jpg',
+  './hero-madrid.jpg',
+  './hero-malaga1.jpg',
+  './hero-valencia.jpg',
   './loc-bcn1.jpg',
   './loc-bcn2.jpg',
   './loc-madrid.jpg',
