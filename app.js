@@ -10,7 +10,7 @@
 // a simple vista, sin herramientas técnicas, si un celular ya actualizó o
 // sigue con una versión vieja en caché). Bumpear junto con CACHE_NAME en
 // service-worker.js cada vez que se sube un cambio.
-const APP_VERSION = 'v40';
+const APP_VERSION = 'v41';
 
 const STORAGE_KEY = 'inv_current_count';
 const HISTORY_KEY = 'inv_history';
@@ -1721,6 +1721,30 @@ function buildEnvioItems(envios) {
   return out;
 }
 
+// Precio con el que se valúa un conteo. Los conteos finalizados guardan el precio
+// que regía ese día (data.prices); así no cambian cuando se actualiza la lista.
+// Los conteos viejos (sin precios guardados) y los que están en curso usan el vigente.
+function priceForData(data, code) {
+  if (data && data.prices) {
+    const v = data.prices[code];
+    return v === undefined || v === null ? null : Number(v);
+  }
+  return getEffectivePrice(code, priceFieldForLocation(data.location));
+}
+
+function snapshotPrices(data) {
+  const field = priceFieldForLocation(data.location);
+  const codes = new Set();
+  [data.stockCounts, data.wasteCounts].forEach(c => Object.keys(c || {}).forEach(k => { if (Number(c[k]) > 0) codes.add(k); }));
+  Object.values(data.envios || {}).forEach(e => Object.keys((e && e.counts) || {}).forEach(k => { if (Number(e.counts[k]) > 0) codes.add(k); }));
+  const out = {};
+  codes.forEach(k => {
+    const p = getEffectivePrice(k, field);
+    if (p !== null) out[k] = p;
+  });
+  return out;
+}
+
 function renderSummary() {
   const isHistory = !!state.viewingHistoryId;
   const data = isHistory
@@ -1750,14 +1774,13 @@ function renderSummary() {
   const totalStockUnits = stockItems.reduce((sum, p) => sum + Number(p.qty), 0);
   const hasWaste = wasteItems.length > 0;
 
-  const priceField = priceFieldForLocation(data.location);
   const valorize = (items) => items.reduce((sum, p) => {
-    const price = getEffectivePrice(p.code, priceField);
+    const price = priceForData(data, p.code);
     return price === null ? sum : sum + Number(p.qty) * price;
   }, 0);
   const fmtMoney = (n) => `${n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   const totalStockValue = valorize(stockItems);
-  const missingStockPrices = stockItems.filter(p => getEffectivePrice(p.code, priceField) === null).length;
+  const missingStockPrices = stockItems.filter(p => priceForData(data, p.code) === null).length;
 
   function buildCategorySummary(items) {
     const totals = {}; // key: "categoria||unidad" -> total
@@ -1842,6 +1865,7 @@ function renderSummary() {
         <div class="num">${fmtMoney(totalStockValue)}</div>
         <div class="lbl">Valor total (Stock) · ${priceLabelForLocation(data.location)}</div>
       </div>
+      ${isHistory && !data.prices ? `<div class="empty-hint">Este conteo es anterior a la versión que guarda los precios: se valúa con el precio vigente hoy, no con el de su fecha.</div>` : ''}
       ${missingStockPrices > 0 ? `<div class="empty-hint" style="color:var(--danger);">⚠ ${missingStockPrices} producto(s) contado(s) todavía no tienen precio cargado, no se incluyen en el valor total.</div>` : ''}
       <div class="section-label">Stock — resumen por categoría</div>
       ${buildCategorySummaryHtml(stockItems)}
@@ -1881,8 +1905,6 @@ async function shareCount(data, stockItems, wasteItems, isHistory, envioItems) {
   const modeLabel = data.mode === 'semanal' ? 'Semanal' : 'Mensual';
   const filename = `Stock ${modeLabel} - ${loc} - ${dateStr}.xlsx`;
 
-  const priceField = priceFieldForLocation(data.location);
-
   let shared = false;
 
   if (typeof ExcelJS === 'undefined' || typeof buildStockWorkbook === 'undefined') {
@@ -1898,7 +1920,7 @@ async function shareCount(data, stockItems, wasteItems, isHistory, envioItems) {
     const wb = buildStockWorkbook(data, stockItems, wasteItems, envioItems, {
       ExcelJS,
       categories: CATEGORIES,
-      priceOf: (p) => getEffectivePrice(p.code, priceField),
+      priceOf: (p) => priceForData(data, p.code),
       priceLabel: priceLabelForLocation(data.location),
       fmtDate,
       envioGroupLabel: (g) => ENVIO_GROUPS[g].label,
@@ -1961,6 +1983,7 @@ function finalizeIfNeeded(data) {
     heladoDetails: state.heladoDetails,
     boxDetails: state.boxDetails,
     generalNote: state.generalNote,
+    prices: snapshotPrices(data), // precio de cada producto al momento de finalizar
     stockCounts: data.stockCounts,
     wasteCounts: data.wasteCounts,
     envios: data.envios || {},
