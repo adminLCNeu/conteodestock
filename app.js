@@ -965,13 +965,31 @@ function getFilteredProducts() {
 
 // Vaschetas pesadas una por una: siempre se muestra una casilla vacía al final,
 // así que cuando se carga una aparece la siguiente.
+// Conteos cargados con el formato viejo (cant. vasquetas x peso prom. + kg manual)
+// se convierten a vaschetas pesadas: una casilla por vasqueta, más una por los kg manuales.
+function migrateHeladoDetail(detail) {
+  if (!detail) return detail;
+  const vasq = Math.round(Number(detail.vasquetas) || 0);
+  const peso = Number(detail.pesoProm) || 0;
+  const manual = Number(detail.manualKg) || 0;
+  if (vasq > 0 || manual > 0) {
+    const list = heladoPesadasList(detail);
+    if (vasq > 0 && peso > 0) for (let i = 0; i < vasq; i++) list.push(peso);
+    if (manual > 0) list.push(manual);
+    detail.pesadas = list;
+    detail.vasquetas = 0;
+    detail.manualKg = 0;
+  }
+  return detail;
+}
+
 function heladoPesadasList(detail) {
   return ((detail && detail.pesadas) || []).filter(n => Number(n) > 0).map(Number);
 }
 
-function heladoTotalKg(detail, pesoProm) {
-  const pesadas = heladoPesadasList(detail).reduce((s, n) => s + n, 0);
-  return Math.round(((detail.vasquetas || 0) * (pesoProm || 0) + (detail.manualKg || 0) + pesadas) * 1000) / 1000;
+function heladoTotalKg(detail) {
+  const sum = heladoPesadasList(detail).reduce((s, n) => s + n, 0);
+  return Math.round(sum * 1000) / 1000;
 }
 
 function heladoPesadasInnerHtml(code, detail) {
@@ -981,7 +999,7 @@ function heladoPesadasInnerHtml(code, detail) {
     `<input type="text" inputmode="decimal" class="helado-input pesada-input" data-vpes="${code}" data-vi="${i}" value="${v === '' ? '' : formatQty(v)}" placeholder="${i + 1}ª" enterkeyhint="next">`
   ).join('');
   return `
-    <span class="helado-label">Vaschetas pesadas (kg)${list.length ? ` · ${list.length} = ${formatQty(sum)} kg` : ''}</span>
+    <span class="helado-label">Vaschetas pesadas (kg)${list.length ? ` · ${list.length} vaschetas` : ''}</span>
     <div class="pesadas-grid">${inputs}</div>`;
 }
 
@@ -1023,15 +1041,7 @@ function buildProductListHtml(filtered) {
       const rowStyle = `style="--cat-color:${categoryColor(p.category)}"`;
 
       if (isHelado) {
-        const detail = activeHeladoDetails()[p.code] || { vasquetas: 0, pesoProm: 0, manualKg: 0 };
-        // En Madrid/Málaga el peso prom. viene fijo desde products.js (avgWeight)
-        // y no se puede tocar. Excepción: si ese producto todavía no tiene
-        // avgWeight cargado, se deja editable para no trabar el conteo.
-        const bloqueaPeso = pesoHeladoBloqueado(state.location) && (p.avgWeight !== null && p.avgWeight !== undefined);
-        const pesoProm = bloqueaPeso ? Number(p.avgWeight) : (detail.pesoProm || 0);
-        const subtotal = (detail.vasquetas || 0) * pesoProm;
-        const sinPesoAvisoHtml = (pesoHeladoBloqueado(state.location) && !bloqueaPeso)
-          ? `<span class="helado-warn">⚠ Sin peso cargado, ingresalo a mano</span>` : '';
+        const detail = migrateHeladoDetail(activeHeladoDetails()[p.code]) || { pesadas: [] };
         listHtml += `
           <div class="product-row ${qty > 0 ? 'counted' : ''}" data-row="${p.code}" ${rowStyle}>
             <div class="product-info">
@@ -1041,20 +1051,6 @@ function buildProductListHtml(filtered) {
             </div>
           </div>
           <div class="helado-controls" data-helado-wrap="${p.code}">
-            <div class="helado-field">
-              <span class="helado-label">Cant. vasquetas</span>
-              <input type="text" inputmode="numeric" class="helado-input" data-vasq="${p.code}" value="${detail.vasquetas || ''}" placeholder="0">
-            </div>
-            <div class="helado-field">
-              <span class="helado-label">Peso prom. (kg)</span>
-              <input type="text" inputmode="decimal" class="helado-input${bloqueaPeso ? ' helado-input-locked' : ''}" data-pesoprom="${p.code}" value="${pesoProm ? formatQty(pesoProm) : ''}" placeholder="Ej: 3,4" ${bloqueaPeso ? 'readonly title="Peso precargado para Madrid/Málaga/Valencia, no editable"' : ''}>
-              ${sinPesoAvisoHtml}
-            </div>
-            <div class="helado-eq">= ${formatQty(subtotal)} kg</div>
-            <div class="helado-field">
-              <span class="helado-label">Kg manual</span>
-              <input type="text" inputmode="decimal" class="helado-input" data-manualkg="${p.code}" value="${detail.manualKg ? formatQty(detail.manualKg) : ''}" placeholder="0">
-            </div>
             <div class="helado-pesadas" data-pesadas-wrap="${p.code}">${heladoPesadasInnerHtml(p.code, detail)}</div>
             <div class="helado-total">Total: <b data-total-label="${p.code}">${formatQty(qty)} kg</b></div>
           </div>`;
@@ -1374,7 +1370,7 @@ function updateHeladoRow(code, field, rawValue, inputEl) {
   if (bloqueaPeso) current.pesoProm = Number(product.avgWeight);
   details[code] = current;
 
-  const total = heladoTotalKg(current, current.pesoProm);
+  const total = heladoTotalKg(current);
   activeCounts()[code] = total;
   saveCurrent();
 
@@ -1405,7 +1401,7 @@ function bindPesadaInputs(root) {
 
 function updatePesada(code, idx, rawValue, focusNext) {
   const details = activeHeladoDetails();
-  const current = details[code] || { vasquetas: 0, pesoProm: 0, manualKg: 0 };
+  const current = migrateHeladoDetail(details[code]) || { pesadas: [] };
   const list = heladoPesadasList(current);
   let value = Math.max(0, parseQtyInput(rawValue));
   if (value > PESO_PROM_MAX_KG) value = confirmGramsToKg(value, 'el peso de la vaschetta');
@@ -1417,12 +1413,9 @@ function updatePesada(code, idx, rawValue, focusNext) {
   }
   current.pesadas = list;
 
-  const product = PRODUCTS.find(p => String(p.code) === String(code));
-  const bloqueaPeso = pesoHeladoBloqueado(state.location) && !!(product && product.avgWeight !== null && product.avgWeight !== undefined);
-  if (bloqueaPeso) current.pesoProm = Number(product.avgWeight);
   details[code] = current;
 
-  const total = heladoTotalKg(current, current.pesoProm);
+  const total = heladoTotalKg(current);
   activeCounts()[code] = total;
   saveCurrent();
 
