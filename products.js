@@ -414,7 +414,7 @@ const PRODUCTS = [
   { code: 90153, name: 'BOLSAS DE POLIETILENO PARA HELADOS', category: 'PACKAGING', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
   { code: 90154, name: 'BOBINA FLOWPACK 270MM', category: 'PACKAGING', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
   { code: 90155, name: 'BOBINA FLOWPACK 220MM', category: 'PACKAGING', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
-  { code: 90156, name: 'PALITOS ICEPOP LUCCIANO\'S', category: 'PACKAGING', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
+  { code: 90156, name: 'PALITOS ICEPOP LUCCIANO\'S', category: 'PACKAGING', unit: 'Unidad', avgWeight: null, price1: 0.003, price2: 0.003, locations: ['Fabrica BCN'] },
   { code: 90157, name: 'VASQUETAS ACRILICO', category: 'PACKAGING', unit: 'Unidad', avgWeight: null, price1: 0.77, price2: 0.77, locations: ['Fabrica BCN'] },
   { code: 90158, name: 'CAJAS DE VASQUETAS CHICA', category: 'PACKAGING', unit: 'Unidad', avgWeight: null, price1: 0.47, price2: 0.47, locations: ['Fabrica BCN'] },
   { code: 90161, name: 'VASOS TERMICOS ROSA MANIJA', category: 'PACKAGING', unit: 'Unidad', avgWeight: null, price1: null, price2: null, locations: ['Fabrica BCN'] },
