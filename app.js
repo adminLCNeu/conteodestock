@@ -10,7 +10,7 @@
 // a simple vista, sin herramientas técnicas, si un celular ya actualizó o
 // sigue con una versión vieja en caché). Bumpear junto con CACHE_NAME en
 // service-worker.js cada vez que se sube un cambio.
-const APP_VERSION = 'v39';
+const APP_VERSION = 'v40';
 
 const STORAGE_KEY = 'inv_current_count';
 const HISTORY_KEY = 'inv_history';
