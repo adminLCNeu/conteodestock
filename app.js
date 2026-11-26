@@ -556,53 +556,121 @@ function render() {
 
 /* ---------------- Login screen ---------------- */
 
+// Ilustración de la pantalla de ingreso: una vitrina de heladería vista desde arriba.
+// Cada cubeta tiene su sabor, su textura y su cartelito.
+function loginVitrinaSvg() {
+  const flavors = [
+    { n: 'Pistacho',       c: '#A3C173', d: '#7DA655', top: 'crumbs', tc: '#4E7A2C' },
+    { n: 'Frutilla',       c: '#F2909F', d: '#E2677D', top: 'dots',   tc: '#C23B57' },
+    { n: 'Limón',          c: '#F6DE70', d: '#E8C94A', top: 'zest',   tc: '#C9A81F' },
+    { n: 'Chocolate',      c: '#74463A', d: '#4F2C24', top: 'chips',  tc: '#2B1612' },
+    { n: 'Dulce de leche', c: '#DDA662', d: '#C4883F', top: 'ribbon', tc: '#8B5A22' },
+    { n: 'Stracciatella',  c: '#FBF3E2', d: '#EADDBF', top: 'chips',  tc: '#4A2E26' },
+  ];
+  const W = 104, H = 84, GAP = 8, X0 = 16, Y0 = 26;
+  const toppings = {
+    crumbs: (x, y, c) => [[24,20,-20],[70,30,15],[44,46,40],[82,16,-35],[18,50,10],[62,52,-15]]
+      .map(([dx,dy,r]) => `<rect x="${x+dx}" y="${y+dy}" width="7" height="3.5" rx="1.5" fill="${c}" transform="rotate(${r} ${x+dx+3} ${y+dy+2})"/>`).join(''),
+    dots: (x, y, c) => [[26,24],[74,22],[50,44],[84,50],[20,48]]
+      .map(([dx,dy]) => `<circle cx="${x+dx}" cy="${y+dy}" r="3.6" fill="${c}"/>`).join(''),
+    zest: (x, y, c) => [[22,22],[60,18],[80,40],[34,46],[70,54]]
+      .map(([dx,dy]) => `<path d="M${x+dx} ${y+dy} q5 -5 10 0" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/>`).join(''),
+    chips: (x, y, c) => [[22,20,10],[56,26,-30],[80,18,25],[30,48,-10],[72,46,40],[48,14,0]]
+      .map(([dx,dy,r]) => `<ellipse cx="${x+dx}" cy="${y+dy}" rx="4.5" ry="2.4" fill="${c}" transform="rotate(${r} ${x+dx} ${y+dy})"/>`).join(''),
+    ribbon: (x, y, c) => `<path d="M${x+14} ${y+24} q12 -12 24 0 t24 0 t24 0" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round" opacity=".75"/>`,
+  };
+  const pans = flavors.map((f, i) => {
+    const col = i % 3, row = Math.floor(i / 3);
+    const x = X0 + col * (W + GAP), y = Y0 + row * (H + GAP);
+    const ix = x + 5, iy = y + 5, iw = W - 10, ih = H - 10;
+    const swirl = [0, 1, 2].map(k =>
+      `<path d="M${ix + 8} ${iy + 14 + k * 17} q11 -8 22 0 t22 0 t22 0 t22 0" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="3.2" stroke-linecap="round"/>`).join('');
+    const tagW = f.n.length * 5.7 + 16;
+    return `
+    <g class="vt-pan" style="--i:${i}">
+      <rect x="${x}" y="${y}" width="${W}" height="${H}" rx="11" class="vt-rim"/>
+      <rect x="${ix}" y="${iy}" width="${iw}" height="${ih}" rx="7" fill="${f.d}"/>
+      <rect x="${ix}" y="${iy}" width="${iw}" height="${ih - 3}" rx="7" fill="${f.c}"/>
+      ${swirl}
+      ${toppings[f.top](x, y, f.tc)}
+      <rect x="${x + W / 2 - tagW / 2}" y="${y + H - 28}" width="${tagW}" height="17" rx="8.5" fill="#FFFDF7" fill-opacity=".96"/>
+      <text x="${x + W / 2}" y="${y + H - 16}" text-anchor="middle" class="vt-label">${f.n}</text>
+    </g>`;
+  }).join('');
+  return `<svg class="login-vitrina-svg" viewBox="0 0 360 232" role="img" aria-label="Cubetas de helado de distintos sabores vistas desde arriba">${pans}</svg>`;
+}
+
+const LOGIN_EYE = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const LOGIN_EYE_OFF = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0112 5c6.4 0 10 7 10 7a17 17 0 01-3.2 4.1M6.5 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.4 4.5-1"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg>';
+
 function renderLogin() {
   app.innerHTML = `
-    <div class="topbar">
-      <div>
-        <h1>📋 Conteo de Inventario</h1>
-        <div class="sub">Lucciano's</div>
+    <div class="login">
+      <div class="login-vitrina">
+        <div class="login-tools">
+          ${themeToggleButtonHtml()}
+          ${viewToggleButtonHtml()}
+        </div>
+        ${loginVitrinaSvg()}
       </div>
-      ${themeToggleButtonHtml()}
-      ${viewToggleButtonHtml()}
-    </div>
-    <div class="home">
-      <div class="home-hero">
-        <span class="emoji">🔒</span>
-        <h2>Ingresá para continuar</h2>
-        <p>Usá tu usuario y contraseña</p>
+      <div class="login-sheet">
+        <h1 class="login-brand">Lucciano’s</h1>
+        <p class="login-sub">Conteo de inventario</p>
+        <form class="login-form" id="loginForm" novalidate>
+          <input class="login-input" type="text" id="loginUser" placeholder="Usuario" aria-label="Usuario"
+            autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <div class="login-pass">
+            <input class="login-input" type="password" id="loginPass" placeholder="Contraseña" aria-label="Contraseña"
+              autocomplete="current-password">
+            <button type="button" class="login-eye" id="loginEye" aria-label="Mostrar contraseña">${LOGIN_EYE}</button>
+          </div>
+          <p class="login-error" id="loginError" role="alert" hidden></p>
+          <button class="login-btn" id="loginBtn" type="submit">Ingresar</button>
+        </form>
       </div>
-      <div class="loc-list" style="padding:0;gap:12px;">
-        <input type="text" id="loginUser" placeholder="Usuario" autocomplete="username"
-          style="padding:14px;border-radius:12px;border:1.5px solid var(--line);font-size:15px;">
-        <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password"
-          style="padding:14px;border-radius:12px;border:1.5px solid var(--line);font-size:15px;">
-      </div>
-      <button class="btn-primary" id="loginBtn">Ingresar</button>
     </div>
   `;
 
   document.getElementById('themeToggleBtn').onclick = toggleTheme;
   document.getElementById('viewToggleBtn').onclick = toggleViewMode;
 
-  const doLogin = () => {
-    const user = document.getElementById('loginUser').value.trim();
-    const pass = document.getElementById('loginPass').value;
+  const form = document.getElementById('loginForm');
+  const userInput = document.getElementById('loginUser');
+  const passInput = document.getElementById('loginPass');
+  const errorEl = document.getElementById('loginError');
+  const eyeBtn = document.getElementById('loginEye');
+
+  eyeBtn.onclick = () => {
+    const show = passInput.type === 'password';
+    passInput.type = show ? 'text' : 'password';
+    eyeBtn.innerHTML = show ? LOGIN_EYE_OFF : LOGIN_EYE;
+    eyeBtn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+  };
+
+  const clearError = () => { errorEl.hidden = true; };
+  userInput.addEventListener('input', clearError);
+  passInput.addEventListener('input', clearError);
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const user = userInput.value.trim();
+    const pass = passInput.value;
     const found = findUser(user);
     const effectivePass = found ? getEffectivePassword(found.username) : null;
     if (!found || pass !== effectivePass) {
-      toast('Usuario o contraseña incorrectos');
+      errorEl.textContent = 'Usuario o contraseña incorrectos. Revisalos e intentá de nuevo.';
+      errorEl.hidden = false;
+      form.classList.remove('shake');
+      void form.offsetWidth; // reinicia la animación
+      form.classList.add('shake');
+      passInput.focus();
+      passInput.select();
       return;
     }
     state.currentUser = found.username;
     saveSession(found.username);
     state.screen = 'location';
     render();
-  };
-
-  document.getElementById('loginBtn').onclick = doLogin;
-  document.getElementById('loginPass').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doLogin();
   });
 }
 
