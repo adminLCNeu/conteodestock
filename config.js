@@ -74,4 +74,43 @@ const USERS = [
   { username: 'sergio S', password: '123456', canDelete: false, canEditPrices: false, locations: ['Valencia'] },
 ];
 
-if (typeof module !== 'undefined') { module.exports = { LOCATIONS, USERS }; }
+// Límites de "cantidad razonable" por producto. Si lo contado supera el límite,
+// el renglón se marca en naranja al cargarlo (se puede seguir igual) y, al
+// finalizar, la app pregunta por cada valor naranja si es correcto.
+// Se busca primero por categoría, después por unidad de medida, y si no hay
+// nada se usa "default". "local" = sucursales, "fabrica" = Fabrica BCN.
+// Si una sucursal te confirma que un valor alto es real, subí el límite acá.
+const QTY_LIMITS = {
+  byCategory: {
+    'ICE POPS CLASSIC':         { local: 600,    fabrica: 5000 },
+    'ICE POPS SIN BAÑO':        { local: 600,    fabrica: 5000 },
+    'ICE POPS BAÑADOS':         { local: 600,    fabrica: 5000 },
+    'ICE POPS LUXURY':          { local: 600,    fabrica: 5000 },
+    'ICE POP DUBAI':            { local: 600,    fabrica: 5000 },
+    'FRASCOS DDL':              { local: 1500,   fabrica: 5000 },
+    'BEBIDAS':                  { local: 600,    fabrica: 600 },
+    'PASTELERIA':               { local: 400,    fabrica: 400 },
+    'CUCURUCHOS':               { local: 30000,  fabrica: 30000 },
+    'POLIPAPEL':                { local: 60000,  fabrica: 60000 },
+    'PACKAGING':                { local: 100000, fabrica: 100000 },
+    'SERVILLETAS':              { local: 100000, fabrica: 100000 },
+    'CUCHARAS':                 { local: 100000, fabrica: 100000 },
+    'CAFÉ':                     { local: 20000,  fabrica: 20000 },
+    'MILK SHAKE':               { local: 20000,  fabrica: 20000 },
+    'VARIOS':                   { local: 10000,  fabrica: 10000 },
+    'CAPSULAS CAFÉ':            { local: 5000,   fabrica: 5000 },
+  },
+  byUnit: {
+    kg:     { local: 150,  fabrica: 500 },
+    litro:  { local: 100,  fabrica: 500 },
+    caja:   { local: 200,  fabrica: 1000 },
+    unidad: { local: 1000, fabrica: 5000 },
+  },
+  default: { local: 1000, fabrica: 5000 },
+};
+// Helado: el límite es por cada vaschetta pesada (no por el total del sabor).
+// Una vaschetta que pese más de esto se marca en naranja.
+const HELADO_PESADA_MAX_KG = 10;
+const FABRICA_NAME = 'Fabrica BCN';
+
+if (typeof module !== 'undefined') { module.exports = { LOCATIONS, USERS, QTY_LIMITS, FABRICA_NAME, HELADO_PESADA_MAX_KG }; }

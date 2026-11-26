@@ -1324,3 +1324,26 @@ input{font-family:inherit;}
 .pesadas-grid .pesada-input{width:76px;}
 .pesadas-grid .pesada-input{width:92px;font-size:18px;}
 .helado-pesadas .helado-label{font-size:12px;}
+
+/* ---- Valores muy altos: renglón naranja + cartel al finalizar ---- */
+.product-row.qty-high { box-shadow: inset 4px 0 0 #F59E0B; background: rgba(245, 158, 11, 0.10); }
+.product-row.qty-high .code::after { content: ' · ⚠ valor muy alto'; color: #D97706; font-weight: 600; }
+.product-row.qty-high .qty-input { border-color: #F59E0B; background: rgba(245, 158, 11, 0.18); }
+.hq-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, 0.55); display: flex; align-items: flex-end; justify-content: center; }
+.hq-card { width: 100%; max-width: 560px; max-height: 86vh; overflow-y: auto; background: var(--surface, #fff); color: var(--ink, #111); border-radius: 18px 18px 0 0; padding: 20px 18px 24px; }
+.hq-card h3 { margin: 0 0 6px; font-size: 20px; }
+.hq-card p { margin: 0 0 14px; opacity: 0.75; font-size: 14px; }
+.hq-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.hq-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 12px; border: 1px solid #F59E0B; background: rgba(245, 158, 11, 0.10); }
+.hq-item.confirmed { border-color: var(--brand-green, #8FC46A); background: rgba(143, 196, 106, 0.16); }
+.hq-name { font-weight: 600; font-size: 15px; }
+.hq-qty { font-size: 18px; font-weight: 700; color: #D97706; }
+.hq-item.confirmed .hq-qty { color: inherit; }
+.hq-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.hq-btn { padding: 8px 12px; border-radius: 10px; border: 1px solid currentColor; background: transparent; color: inherit; font-weight: 600; font-size: 13px; cursor: pointer; }
+.hq-ok { background: #111; color: #fff; border-color: #111; }
+.hq-item.confirmed .hq-ok { background: var(--brand-green, #8FC46A); color: #111; border-color: transparent; }
+.hq-footer { display: flex; gap: 10px; }
+.hq-footer button { flex: 1; width: auto; }
+.hq-footer .btn-primary:disabled { opacity: 0.4; }
+.pesada-input.pesada-high { border-color: #F59E0B !important; background: rgba(245, 158, 11, 0.20) !important; }

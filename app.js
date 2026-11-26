@@ -10,7 +10,7 @@
 // a simple vista, sin herramientas técnicas, si un celular ya actualizó o
 // sigue con una versión vieja en caché). Bumpear junto con CACHE_NAME en
 // service-worker.js cada vez que se sube un cambio.
-const APP_VERSION = 'v42';
+const APP_VERSION = 'v43';
 
 const STORAGE_KEY = 'inv_current_count';
 const HISTORY_KEY = 'inv_history';
@@ -996,7 +996,7 @@ function heladoPesadasInnerHtml(code, detail) {
   const list = heladoPesadasList(detail);
   const sum = list.reduce((s, n) => s + n, 0);
   const inputs = list.concat(['']).map((v, i) =>
-    `<input type="text" inputmode="decimal" class="helado-input pesada-input" data-vpes="${code}" data-vi="${i}" value="${v === '' ? '' : formatQty(v)}" placeholder="${i + 1}ª" enterkeyhint="next">`
+    `<input type="text" inputmode="decimal" class="helado-input pesada-input${v !== '' && v > HELADO_PESADA_MAX_KG ? ' pesada-high' : ''}" data-vpes="${code}" data-vi="${i}" value="${v === '' ? '' : formatQty(v)}" placeholder="${i + 1}ª" enterkeyhint="next">`
   ).join('');
   return `
     <span class="helado-label">Vaschetas pesadas (kg)${list.length ? ` · ${list.length} vaschetas` : ''}</span>
@@ -1043,7 +1043,7 @@ function buildProductListHtml(filtered) {
       if (isHelado) {
         const detail = migrateHeladoDetail(activeHeladoDetails()[p.code]) || { pesadas: [] };
         listHtml += `
-          <div class="product-row ${qty > 0 ? 'counted' : ''}" data-row="${p.code}" ${rowStyle}>
+          <div class="product-row ${qty > 0 ? 'counted' : ''} ${highQtyClass(p.code, qty)}" data-row="${p.code}" ${rowStyle}>
             <div class="product-info">
               <div class="code">#${p.code} · Kg</div>
               <div class="name">${escapeHtml(p.name)}</div>
@@ -1087,7 +1087,7 @@ function buildProductListHtml(filtered) {
               <input type="text" inputmode="decimal" class="helado-input" data-manualextra="${p.code}" value="${detail.manualExtra ? formatQty(detail.manualExtra) : ''}" placeholder="Ej: 3" title="Se suma directo al total, para items abiertos o parciales">
             </div>` : '';
         listHtml += `
-          <div class="product-row ${qty > 0 ? 'counted' : ''}" data-row="${p.code}" ${rowStyle}>
+          <div class="product-row ${qty > 0 ? 'counted' : ''} ${highQtyClass(p.code, qty)}" data-row="${p.code}" ${rowStyle}>
             <div class="product-info">
               <div class="code">#${p.code} · ${escapeHtml(p.unit)}${effectiveWeight ? ` · ${formatQty(effectiveWeight)} ${unitLabel}/ud` : ''}</div>
               <div class="name">${escapeHtml(p.name)}</div>
@@ -1121,7 +1121,7 @@ function buildProductListHtml(filtered) {
             value="${escapeHtml(state.wasteNotes[p.code] || '')}" data-note="${p.code}">
         </div>` : '';
       listHtml += `
-        <div class="product-row ${qty > 0 ? 'counted' : ''}" data-row="${p.code}" ${rowStyle}>
+        <div class="product-row ${qty > 0 ? 'counted' : ''} ${highQtyClass(p.code, qty)}" data-row="${p.code}" ${rowStyle}>
           <div class="product-info">
             <div class="code">#${p.code} · ${escapeHtml(p.unit)}</div>
             <div class="name">${escapeHtml(p.name)}</div>
@@ -1228,22 +1228,25 @@ function renderCount() {
       // Si no se cargó nada para esta sucursal, simplemente se vuelve a la lista
       // de destinos (no queda un envío vacío registrado).
       if (countedItemsCount() === 0 && state.envios) delete state.envios[state.envioDest];
-      saveCurrent();
-      state.screen = 'envioDest';
-      render();
-      return;
-    }
-    if (countedItemsCount() === 0) {
+    } else if (countedItemsCount() === 0) {
       toast('Contá al menos un producto antes de finalizar');
       return;
     }
-    if (isWaste) {
-      state.screen = 'envioDest';
+    const proceed = () => {
+      if (isEnvio) {
+        saveCurrent();
+        state.screen = 'envioDest';
+      } else if (isWaste) {
+        state.screen = 'envioDest';
+      } else {
+        state.screen = 'askWaste';
+      }
       render();
-    } else {
-      state.screen = 'askWaste';
-      render();
-    }
+    };
+    // Valores naranja (muy por encima de lo habitual): hay que confirmarlos.
+    const high = highQtyItems();
+    if (high.length) showHighQtyModal(high, proceed);
+    else proceed();
   };
 }
 
@@ -1325,6 +1328,118 @@ function attachCountRowHandlers() {
 
 // Umbrales usados para detectar que alguien anotó el peso tal como lo
 // muestra la balanza (gramos, ej. 3484) en un campo que espera kg (3,484).
+/* ---------------- Valores sospechosamente altos ---------------- */
+
+// Límite "razonable" para un producto en la sucursal actual (ver QTY_LIMITS).
+function qtyLimitFor(code) {
+  const p = getBaseProduct(code);
+  if (!p) return Infinity;
+  const kind = state.location === FABRICA_NAME ? 'fabrica' : 'local';
+  const cat = QTY_LIMITS.byCategory[p.category];
+  const unit = QTY_LIMITS.byUnit[String(p.unit).toLowerCase()];
+  const lim = cat || unit || QTY_LIMITS.default;
+  return lim[kind];
+}
+// Helado: la pesada más alta de las vaschetas cargadas para ese sabor.
+function heladoMaxPesada(code) {
+  const detail = migrateHeladoDetail(activeHeladoDetails()[code]);
+  return detail ? Math.max(0, ...heladoPesadasList(detail)) : 0;
+}
+function isHighQty(code, qty) {
+  const p = getBaseProduct(code);
+  if (p && p.category === 'HELADO (KG)') return heladoMaxPesada(code) > HELADO_PESADA_MAX_KG;
+  return Number(qty) > qtyLimitFor(code);
+}
+function highQtyClass(code, qty) {
+  return isHighQty(code, qty) ? 'qty-high' : '';
+}
+function setHighQtyClass(code, qty) {
+  const row = document.querySelector(`[data-row="${code}"]`);
+  if (row) row.classList.toggle('qty-high', isHighQty(code, qty));
+}
+// Productos del conteo actual (stock, desperdicio o envío) que pasan el límite.
+function highQtyItems() {
+  const counts = activeCounts();
+  const items = [];
+  Object.keys(counts).forEach(code => {
+    const qty = Number(counts[code]) || 0;
+    if (qty > 0 && isHighQty(code, qty)) {
+      const p = getBaseProduct(code);
+      const isHelado = p && p.category === 'HELADO (KG)';
+      items.push({
+        code, qty, name: p ? p.name : code, unit: p ? p.unit : '',
+        detail: isHelado ? `Una vaschetta pesa ${formatQty(heladoMaxPesada(code))} kg (total del sabor: ${formatQty(qty)} kg)` : '',
+      });
+    }
+  });
+  return items;
+}
+
+// Cartel al finalizar: pregunta por cada valor naranja. Hay que marcar cada uno
+// como correcto para seguir; "Corregir" vuelve al conteo y lleva a ese producto.
+function showHighQtyModal(items, onContinue) {
+  const old = document.getElementById('highQtyModal');
+  if (old) old.remove();
+  const ok = {};
+  const modal = document.createElement('div');
+  modal.id = 'highQtyModal';
+  modal.className = 'hq-overlay';
+  const rows = items.map(it => `
+    <div class="hq-item" data-hq="${it.code}">
+      <div class="hq-info">
+        <div class="hq-name">${escapeHtml(it.name)}</div>
+        <div class="hq-qty">${it.detail ? escapeHtml(it.detail) : `${Number(it.qty).toLocaleString('es-ES')} ${escapeHtml(String(it.unit).toLowerCase())}`}</div>
+      </div>
+      <div class="hq-actions">
+        <button class="hq-btn hq-fix" data-hq-fix="${it.code}">Corregir</button>
+        <button class="hq-btn hq-ok" data-hq-ok="${it.code}">Es correcto</button>
+      </div>
+    </div>`).join('');
+  modal.innerHTML = `
+    <div class="hq-card" role="dialog" aria-modal="true">
+      <h3>¿Estás seguro de estos valores?</h3>
+      <p>Son mucho más altos que lo habitual. Confirmá cada uno o corregilo antes de enviar.</p>
+      <div class="hq-list">${rows}</div>
+      <div class="hq-footer">
+        <button class="btn-secondary" id="hqCancel">Volver al conteo</button>
+        <button class="btn-primary" id="hqContinue" disabled>Continuar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  const refresh = () => {
+    const all = items.every(it => ok[it.code]);
+    modal.querySelector('#hqContinue').disabled = !all;
+  };
+  modal.addEventListener('click', (e) => {
+    const okBtn = e.target.closest('[data-hq-ok]');
+    if (okBtn) {
+      const code = okBtn.getAttribute('data-hq-ok');
+      ok[code] = !ok[code];
+      okBtn.closest('.hq-item').classList.toggle('confirmed', !!ok[code]);
+      okBtn.textContent = ok[code] ? 'Confirmado ✓' : 'Es correcto';
+      refresh();
+      return;
+    }
+    const fixBtn = e.target.closest('[data-hq-fix]');
+    if (fixBtn) {
+      const code = fixBtn.getAttribute('data-hq-fix');
+      modal.remove();
+      state.search = '';
+      state.activeCategory = 'Todas';
+      render();
+      const row = document.querySelector(`[data-row="${code}"]`);
+      if (row) {
+        row.scrollIntoView({ block: 'center' });
+        const input = row.querySelector('[data-qty]');
+        if (input) { input.focus(); input.select(); }
+      }
+    }
+  });
+  modal.querySelector('#hqCancel').onclick = () => modal.remove();
+  modal.querySelector('#hqContinue').onclick = () => { modal.remove(); onContinue(); };
+}
+
 // Ninguna vasqueta pesa 30kg y es rarísimo tener 200kg sueltos de un mismo
 // sabor, así que un valor por encima de eso casi siempre es "faltó la coma".
 const PESO_PROM_MAX_KG = 30;
@@ -1376,6 +1491,7 @@ function updateHeladoRow(code, field, rawValue, inputEl) {
 
   const row = document.querySelector(`[data-row="${code}"]`);
   if (row) row.classList.toggle('counted', total > 0);
+  setHighQtyClass(code, total);
   const wrap = document.querySelector(`[data-helado-wrap="${code}"]`);
   if (wrap) {
     const eq = wrap.querySelector('.helado-eq');
@@ -1431,6 +1547,7 @@ function updatePesada(code, idx, rawValue, focusNext) {
   }
   const row = document.querySelector(`[data-row="${code}"]`);
   if (row) row.classList.toggle('counted', total > 0);
+  setHighQtyClass(code, total);
   const totalLabel = document.querySelector(`[data-total-label="${code}"]`);
   if (totalLabel) totalLabel.textContent = `${formatQty(total)} kg`;
   updateProgressUI();
@@ -1469,6 +1586,7 @@ function updateBoxRow(code, field, rawValue, inputEl) {
 
   const row = document.querySelector(`[data-row="${code}"]`);
   if (row) row.classList.toggle('counted', total > 0);
+  setHighQtyClass(code, total);
   const wrap = document.querySelector(`[data-box-wrap="${code}"]`);
   if (wrap) {
     const eq = wrap.querySelector('.helado-eq');
@@ -1533,6 +1651,7 @@ function updateRowUI(code, qty) {
   const row = document.querySelector(`[data-row="${code}"]`);
   if (!row) return;
   row.classList.toggle('counted', qty > 0);
+  row.classList.toggle('qty-high', isHighQty(code, qty));
   const input = row.querySelector('[data-qty]');
   if (input && document.activeElement !== input) input.value = formatQty(qty);
   updateProgressUI();
