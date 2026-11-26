@@ -1089,3 +1089,231 @@ input{font-family:inherit;}
 }
 .login-theme button .icon-svg{width:16px;height:16px;}
 .login-theme button.on{background:#fff;color:#0E0E10;}
+
+/* =====================================================================
+   SKIN C — look de marca en blanco y negro con acento pistacho.
+   Variables globales (afectan todas las pantallas) + componentes nuevos
+   (.c-head, .loc-grid). Los IDs y data-attributes no cambian.
+   ===================================================================== */
+:root{
+  --pink:#0E0E10;
+  --pink-dark:#000000;
+  --on-accent:#FFFFFF;
+  --accent-text:#3F6B2A;
+  --brand-green:#8FC46A;
+  --cream:#FFFFFF;
+  --surface:#FFFFFF;
+  --ink:#0E0E10;
+  --ink-soft:#5B5B60;
+  --line:#E3E3E3;
+  --field:#F1F1F1;
+  --counted-bg:#F1F8EA;
+  --radius:16px;
+  --shadow-sm:none;
+  --shadow-md:none;
+  --shadow-lg:none;
+}
+:root[data-theme="dark"]{
+  --pink:#8FC46A;
+  --pink-dark:#7AB057;
+  --on-accent:#0E0E10;
+  --accent-text:#8FC46A;
+  --cream:#0E0E10;
+  --surface:#18181B;
+  --ink:#F5F5F5;
+  --ink-soft:#A1A1A6;
+  --line:#2A2A2E;
+  --field:#1E1E21;
+  --counted-bg:#17240F;
+  --white:#18181B;
+}
+
+/* Barra superior de las pantallas que todavía no tienen encabezado nuevo */
+.topbar{background:#0E0E10;color:#fff;box-shadow:none;}
+:root[data-theme="dark"] .topbar{background:#000;border-bottom:1px solid var(--line);}
+.badge{background:var(--brand-green);color:#0E0E10;}
+
+/* ---------- Encabezado negro ---------- */
+.c-head{
+  background:#0E0E10;
+  color:#fff;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 26px;
+  border-radius:0 0 30px 30px;
+}
+:root[data-theme="dark"] .c-head{background:#000;border-bottom:1px solid var(--line);}
+.c-head-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px;}
+.c-logo{height:30px;width:auto;display:block;}
+.c-tools{display:flex;gap:6px;}
+.c-head .icon-btn{
+  color:#fff;
+  background:rgba(255,255,255,.12);
+  border:0;
+  border-radius:12px;
+  width:40px;height:40px;
+  padding:0;
+}
+.c-head .icon-btn:active{background:rgba(255,255,255,.25);}
+.c-title{
+  margin:22px 0 4px;
+  font-size:40px;
+  line-height:1.02;
+  font-weight:850;
+  letter-spacing:-.035em;
+}
+.c-sub{margin:0;font-size:14px;color:rgba(255,255,255,.7);font-weight:500;}
+.c-head-count{padding-bottom:20px;}
+.c-head-count .c-title{font-size:30px;margin-top:14px;}
+
+/* ---------- Elegir sucursal ---------- */
+.home{padding:20px 16px 40px;gap:20px;}
+.loc-list.loc-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:0;
+}
+.loc-grid .loc-item{
+  height:170px;
+  border-radius:22px;
+  text-align:left;
+}
+.loc-grid .loc-item:first-child:nth-last-child(n+2){grid-column:1 / -1;height:190px;}
+.loc-grid .loc-item .loc-name{font-size:20px;font-weight:800;letter-spacing:-.02em;}
+.loc-grid .loc-item .arrow{color:#fff;}
+.section-label{color:var(--ink);font-size:13px;font-weight:800;letter-spacing:.02em;text-transform:none;margin:10px 0 -6px;}
+.resume-card{border:2px solid var(--ink);border-radius:20px;background:var(--surface);}
+.resume-card .go{color:var(--accent-text);}
+.history-item{border:0;border-bottom:2px solid var(--ink);border-radius:0;background:transparent;padding:12px 2px;}
+.history-item button{color:var(--accent-text);}
+.empty-hint{text-align:left;}
+
+/* ---------- Tipo de conteo ---------- */
+.mode-home{gap:10px;}
+.mode-home .btn-primary,.mode-home .btn-secondary{
+  text-align:left;
+  padding:26px 22px;
+  border-radius:22px;
+  font-size:32px;
+  font-weight:850;
+  letter-spacing:-.03em;
+  line-height:1.05;
+}
+.mode-home .btn-primary{background:#0E0E10;color:#fff;border:2px solid #0E0E10;}
+:root[data-theme="dark"] .mode-home .btn-primary{background:var(--brand-green);color:#0E0E10;border-color:var(--brand-green);}
+.mode-home .btn-secondary{background:transparent;border:2px solid var(--ink);color:var(--ink);}
+.mode-home small{display:block;margin-top:8px;font-size:14px;font-weight:500;letter-spacing:0;opacity:.75;}
+.mode-hint{margin:-2px 4px 14px;padding:0;font-size:13px;}
+
+/* ---------- Conteo ---------- */
+.count-controls{top:0;padding:14px 16px 10px;border-bottom:2px solid var(--ink);}
+.progress-track{height:8px;border-radius:4px;background:var(--field);}
+.progress-fill{background:var(--accent-text);}
+.search-wrap input{background:var(--field);border:0;border-radius:14px;padding:14px 14px 14px 40px;}
+.chip{background:var(--field);border:0;border-radius:10px;color:var(--ink);font-weight:700;}
+.chip.active{background:var(--ink);color:var(--cream);}
+.product-list{padding:4px 16px 110px;}
+.cat-heading{color:var(--accent-text);font-weight:800;font-size:12px;padding:18px 0 4px;}
+.cat-heading .cat-dot{display:none;}
+.product-row{
+  background:transparent;
+  border:0;
+  border-bottom:2px solid var(--ink);
+  border-radius:0;
+  box-shadow:none;
+  padding:14px 4px;
+  margin:0;
+}
+.product-row.counted{background:var(--counted-bg);border-color:var(--ink);}
+.product-info .name{font-size:18px;font-weight:800;letter-spacing:-.01em;}
+.qty-btn{width:42px;height:42px;border:2px solid var(--ink);border-radius:12px;background:transparent;color:var(--ink);}
+.qty-btn.minus,.qty-btn.plus{color:var(--ink);}
+.qty-input{width:56px;height:42px;border:2px solid var(--ink);border-radius:12px;background:transparent;color:var(--ink);font-size:20px;font-weight:850;}
+.helado-input{border:2px solid var(--ink);border-radius:10px;background:transparent;color:var(--ink);}
+.helado-total b{color:var(--accent-text);}
+.footer-bar{
+  background:#0E0E10;
+  border:0;
+  border-radius:26px 26px 0 0;
+  box-shadow:none;
+  align-items:center;
+}
+:root[data-theme="dark"] .footer-bar{background:#000;border-top:1px solid var(--line);}
+.footer-bar .btn-primary{
+  background:var(--brand-green);
+  color:#0E0E10;
+  font-weight:800;
+  border-radius:16px;
+}
+.footer-bar .qty-btn{background:rgba(255,255,255,.1);border:0;color:#fff;}
+.footer-bar .count-pill{color:rgba(255,255,255,.7);}
+
+/* ---- ajustes skin C ---- */
+.loc-grid .loc-item{border:0;box-shadow:none;}
+.loc-grid .loc-item .loc-name{font-family:var(--sans);font-style:normal;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.45);}
+.loc-grid .loc-item .loc-overlay{background:linear-gradient(0deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.1) 60%, rgba(0,0,0,0) 100%);}
+.loc-grid .loc-item .loc-content{align-items:flex-end;padding:0 14px 14px 16px;}
+.product-row:has(+ .helado-controls){border-bottom:0;padding-bottom:6px;}
+.helado-controls{
+  background:transparent;
+  border:0;
+  border-bottom:2px solid var(--ink);
+  border-radius:0;
+  margin:0;
+  padding:0 4px 14px;
+}
+.helado-label{color:var(--ink-soft);font-weight:700;}
+.product-info .code{color:var(--ink-soft);}
+
+/* ---- skin C: pantallas restantes ---- */
+.pw-fields{display:flex;flex-direction:column;gap:10px;}
+.pw-fields input,.note-textarea{
+  width:100%;
+  padding:16px;
+  border-radius:14px;
+  border:0;
+  background:var(--field);
+  color:var(--ink);
+  font-size:16px;
+  font-family:inherit;
+}
+.pw-fields input:focus,.note-textarea:focus{outline:2px solid var(--ink);}
+.note-question,.note-summary-block{
+  background:transparent;
+  border:2px solid var(--ink);
+  border-radius:20px;
+}
+.note-question-label{font-size:16px;font-weight:800;}
+.home .btn-primary,.home .btn-secondary{padding:20px;font-size:18px;font-weight:800;border-radius:18px;}
+.home .btn-primary{background:var(--ink);color:var(--cream);}
+:root[data-theme="dark"] .home .btn-primary{background:var(--brand-green);color:#0E0E10;}
+.home .btn-secondary{background:transparent;border:2px solid var(--ink);color:var(--ink);}
+.mode-home .btn-primary,.mode-home .btn-secondary{padding:26px 22px;font-size:32px;}
+.footer-bar .btn-secondary{background:rgba(255,255,255,.1);border:0;color:#fff;padding:14px;font-size:15px;border-radius:16px;}
+.footer-bar .btn-primary{padding:14px;font-size:16px;}
+
+.summary{padding:20px 16px 120px;}
+.summary-stats{gap:10px;}
+.stat-card{
+  background:var(--ink);
+  color:var(--cream);
+  border:0;
+  border-radius:20px;
+  padding:18px 14px;
+  text-align:left;
+}
+.stat-card .num{font-family:var(--sans);font-size:34px;font-weight:850;letter-spacing:-.03em;color:var(--brand-green);}
+:root:not([data-theme="dark"]) .stat-card .lbl{color:rgba(255,255,255,.7);}
+.stat-card .lbl{font-size:12.5px;font-weight:600;}
+.cat-chart,.summary-table{background:transparent;border:0;border-radius:0;box-shadow:none;}
+.cat-bar-row{padding:12px 2px;border-bottom:2px solid var(--ink);}
+.cat-bar-row:last-child{border-bottom:2px solid var(--ink);}
+.cat-bar-top{font-size:14px;}
+.cat-bar-top .cat-name{font-weight:800;}
+.cat-bar-top .cat-name .cat-dot{display:none;}
+.cat-bar-top .cat-total{color:var(--ink);font-weight:850;}
+.cat-bar-track{height:8px;background:var(--field);}
+.cat-bar-fill{background:var(--accent-text);}
+.summary-row{padding:12px 2px;border-bottom:2px solid var(--ink);font-size:15px;font-weight:700;}
+.summary-row:last-child{border-bottom:2px solid var(--ink);}
+.summary-row .qty{font-family:var(--sans);font-weight:850;font-size:17px;}
+.home .btn-primary,.home .btn-secondary{width:100%;}

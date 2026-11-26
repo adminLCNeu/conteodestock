@@ -10,7 +10,7 @@
 // a simple vista, sin herramientas técnicas, si un celular ya actualizó o
 // sigue con una versión vieja en caché). Bumpear junto con CACHE_NAME en
 // service-worker.js cada vez que se sube un cambio.
-const APP_VERSION = 'v38';
+const APP_VERSION = 'v39';
 
 const STORAGE_KEY = 'inv_current_count';
 const HISTORY_KEY = 'inv_history';
@@ -714,24 +714,23 @@ function renderLocation() {
   }
 
   app.innerHTML = `
-    <div class="topbar topbar-home">
-      <div>
-        <h1>📋 Conteo de Inventario</h1>
+    <div class="c-head">
+      <div class="c-head-row">
+        <img class="c-logo" src="logo-luccianos.svg" alt="Lucciano’s">
+        <div class="c-tools">
+          ${currentUserCanEditPrices() ? `<button class="icon-btn" id="pricesBtn" title="Precios">💶</button>` : ''}
+          <button class="icon-btn" id="changePwBtn" title="Cambiar contraseña">${ICONS.key}</button>
+          ${themeToggleButtonHtml()}
+          ${viewToggleButtonHtml()}
+          <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">${ICONS.logout}</button>
+        </div>
       </div>
-      ${currentUserCanEditPrices() ? `<button class="icon-btn" id="pricesBtn" title="Precios">💶</button>` : ''}
-      <button class="icon-btn" id="changePwBtn" title="Cambiar contraseña">${ICONS.key}</button>
-      ${themeToggleButtonHtml()}
-      ${viewToggleButtonHtml()}
-      <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">${ICONS.logout}</button>
+      <h2 class="c-title">¿Dónde contamos hoy?</h2>
+      <p class="c-sub">${escapeHtml(state.currentUser || '')}</p>
     </div>
     <div class="home">
-      <div class="home-hero hero-noir">
-        <div class="rule"></div>
-        <h2>¿Listo para contar?</h2>
-        <p>Elegí una sucursal para empezar</p>
-      </div>
       ${resumeHtml}
-      <div class="loc-list" style="padding:0;">
+      <div class="loc-list loc-grid">
         ${allowedLocations().map(loc => `
           <button class="loc-item ${loc.photo ? '' : 'no-photo'}" data-loc="${escapeHtml(loc.name)}">
             <div class="loc-bg" ${loc.photo ? `style="background-image:url('${escapeHtml(loc.photo)}')"` : ''}></div>
@@ -851,24 +850,21 @@ function renderMode() {
   const prevMensual = getPrevStock(state.location, 'mensual');
 
   const prevLineHtml = (prev, label) => prev
-    ? `<p class="empty-hint" style="text-align:left;">📋 Último conteo ${label.toLowerCase()} de esta sucursal: ${fmtDate(prev.savedAt)}${prev.generatedBy ? ` (por ${escapeHtml(prev.generatedBy)})` : ''}. Vas a poder verlo de referencia mientras contás.</p>`
-    : `<p class="empty-hint" style="text-align:left;">Todavía no hay un conteo ${label.toLowerCase()} registrado para esta sucursal.</p>`;
+    ? `<p class="empty-hint mode-hint">Último conteo ${label.toLowerCase()} de esta sucursal: ${fmtDate(prev.savedAt)}${prev.generatedBy ? ` (por ${escapeHtml(prev.generatedBy)})` : ''}. Vas a poder verlo de referencia mientras contás.</p>`
+    : `<p class="empty-hint mode-hint">Todavía no hay un conteo ${label.toLowerCase()} registrado para esta sucursal.</p>`;
 
   app.innerHTML = `
-    <div class="topbar">
-      <button class="icon-btn" id="backBtn">${ICONS.chevronLeft}</button>
-      <h1>${escapeHtml(state.location)}</h1>
-      <span style="width:32px"></span>
-    </div>
-    <div class="home">
-      <div class="home-hero">
-        <span class="emoji">🗓️</span>
-        <h2>¿Qué conteo vas a hacer?</h2>
-        <p>Elegí semanal o mensual</p>
+    <div class="c-head">
+      <div class="c-head-row">
+        <button class="icon-btn" id="backBtn" aria-label="Volver">${ICONS.chevronLeft}</button>
       </div>
-      <button class="btn-primary" id="modeSemanalBtn">📆 Semanal — Helado + Ice Pops</button>
+      <h2 class="c-title">${escapeHtml(state.location)}</h2>
+      <p class="c-sub">¿Qué conteo vas a hacer?</p>
+    </div>
+    <div class="home mode-home">
+      <button class="btn-primary" id="modeSemanalBtn">Semanal<small>Helado + Ice Pops</small></button>
       ${prevLineHtml(prevSemanal, 'Semanal')}
-      <button class="btn-secondary" id="modeMensualBtn" style="margin-top:6px;">🗂️ Mensual — Todo el listado</button>
+      <button class="btn-secondary" id="modeMensualBtn">Mensual<small>Todo el listado</small></button>
       ${prevLineHtml(prevMensual, 'Mensual')}
     </div>
   `;
@@ -905,28 +901,23 @@ function renderMode() {
 
 function renderChangePassword() {
   app.innerHTML = `
-    <div class="topbar">
-      <button class="icon-btn" id="backBtn">${ICONS.chevronLeft}</button>
-      <h1>Cambiar contraseña</h1>
-      <span style="width:32px"></span>
+    <div class="c-head">
+      <div class="c-head-row">
+        <button class="icon-btn" id="backBtn" aria-label="Volver">${ICONS.chevronLeft}</button>
+        
+      </div>
+      <h2 class="c-title">Cambiar contraseña</h2>
+      <p class="c-sub">${escapeHtml(state.currentUser)} · solo cambia tu clave en este celular</p>
     </div>
     <div class="home">
-      <div class="home-hero">
-        <span class="emoji">🔑</span>
-        <h2>${escapeHtml(state.currentUser)}</h2>
-        <p>Esto solo cambia tu clave en este celular</p>
-      </div>
-      <div class="loc-list" style="padding:0;gap:12px;">
-        <input type="password" id="pwCurrent" placeholder="Contraseña actual" autocomplete="current-password"
-          style="padding:14px;border-radius:12px;border:1.5px solid var(--line);font-size:15px;">
-        <input type="password" id="pwNew" placeholder="Contraseña nueva" autocomplete="new-password"
-          style="padding:14px;border-radius:12px;border:1.5px solid var(--line);font-size:15px;">
-        <input type="password" id="pwConfirm" placeholder="Repetir contraseña nueva" autocomplete="new-password"
-          style="padding:14px;border-radius:12px;border:1.5px solid var(--line);font-size:15px;">
+      <div class="pw-fields">
+        <input type="password" id="pwCurrent" placeholder="Contraseña actual" autocomplete="current-password">
+        <input type="password" id="pwNew" placeholder="Contraseña nueva" autocomplete="new-password">
+        <input type="password" id="pwConfirm" placeholder="Repetir contraseña nueva" autocomplete="new-password">
       </div>
       <button class="btn-primary" id="pwSaveBtn">Guardar nueva contraseña</button>
-      <p class="empty-hint" style="text-align:left;">
-        ⚠️ Como la app no tiene servidor propio, este cambio queda guardado
+      <p class="empty-hint">
+        Como la app no tiene servidor propio, este cambio queda guardado
         solo en este celular. Si entrás desde otro dispositivo vas a necesitar
         la contraseña original hasta que la cambies ahí también.
       </p>
@@ -1145,13 +1136,13 @@ function renderCount() {
       </div>` : '';
 
   app.innerHTML = `
-    <div class="topbar">
-      <button class="icon-btn" id="backBtn">${ICONS.chevronLeft}</button>
-      <div style="text-align:center;">
-        <h1>${escapeHtml(state.location)}${isEnvio ? ` → ${escapeHtml(state.envioDest)}` : ''}</h1>
-        <div class="sub">${state.mode === 'semanal' ? 'Semanal' : 'Mensual'} · ${stageLabel} · guardado automático · ${APP_VERSION}</div>
+    <div class="c-head c-head-count">
+      <div class="c-head-row">
+        <button class="icon-btn" id="backBtn" aria-label="Volver">${ICONS.chevronLeft}</button>
+        <span class="badge">${counted}/${productsForMode().length}</span>
       </div>
-      <span class="badge">${counted}/${productsForMode().length}</span>
+      <h2 class="c-title">${escapeHtml(state.location)}${isEnvio ? ` → ${escapeHtml(state.envioDest)}` : ''}</h2>
+      <p class="c-sub">${state.mode === 'semanal' ? 'Semanal' : 'Mensual'} · ${stageLabel} · se guarda solo</p>
     </div>
     <div class="count-controls">
       <div class="progress-track"><div class="progress-fill" style="width:${productsForMode().length ? Math.round(counted / productsForMode().length * 100) : 0}%"></div></div>
@@ -1482,17 +1473,15 @@ function renderAskWaste() {
   const nStock = countPositive(state.stockCounts);
   const hasNote = !!(state.generalNote && state.generalNote.trim());
   app.innerHTML = `
-    <div class="topbar">
-      <button class="icon-btn" id="backBtn">${ICONS.chevronLeft}</button>
-      <h1>${escapeHtml(state.location)}</h1>
-      <span style="width:32px"></span>
+    <div class="c-head">
+      <div class="c-head-row">
+        <button class="icon-btn" id="backBtn" aria-label="Volver">${ICONS.chevronLeft}</button>
+        
+      </div>
+      <h2 class="c-title">¿Tuviste desperdicios?</h2>
+      <p class="c-sub">${escapeHtml(state.location)} · ya contaste ${nStock} producto${nStock === 1 ? '' : 's'} de stock</p>
     </div>
     <div class="home">
-      <div class="home-hero">
-        <span class="emoji">🗑️</span>
-        <h2>¿Tuviste desperdicios?</h2>
-        <p>Ya contaste ${nStock} producto${nStock === 1 ? '' : 's'} de stock</p>
-      </div>
       <button class="btn-primary" id="wasteYes">Sí, contar desperdicio</button>
       <button class="btn-secondary" id="wasteNo">No, seguir</button>
 
@@ -1579,17 +1568,15 @@ function renderEnvioDest() {
   };
 
   app.innerHTML = `
-    <div class="topbar">
-      <button class="icon-btn" id="backBtn">${ICONS.chevronLeft}</button>
-      <h1>${escapeHtml(state.location)}</h1>
-      <span style="width:32px"></span>
+    <div class="c-head">
+      <div class="c-head-row">
+        <button class="icon-btn" id="backBtn" aria-label="Volver">${ICONS.chevronLeft}</button>
+        
+      </div>
+      <h2 class="c-title">¿Hiciste envíos a otras sucursales?</h2>
+      <p class="c-sub">${escapeHtml(state.location)} · cargá productos terminados, materia prima e insumos de local</p>
     </div>
     <div class="home">
-      <div class="home-hero">
-        <span class="emoji">🚚</span>
-        <h2>¿Hiciste envíos a otras sucursales?</h2>
-        <p>Elegí a qué sucursal mandaste y cargá los productos terminados, la materia prima y los insumos de local</p>
-      </div>
       <div class="section-label">Sucursal destino</div>
       <div class="history-list">${destinos.map(destRow).join('')}</div>
       <div style="margin-top:18px;">
@@ -1762,17 +1749,15 @@ function renderSummary() {
   ` : '';
 
   app.innerHTML = `
-    <div class="topbar">
-      <button class="icon-btn" id="backBtn">${ICONS.chevronLeft}</button>
-      <h1>Resumen</h1>
-      <span style="width:32px"></span>
+    <div class="c-head">
+      <div class="c-head-row">
+        <button class="icon-btn" id="backBtn" aria-label="Volver">${ICONS.chevronLeft}</button>
+        
+      </div>
+      <h2 class="c-title">${escapeHtml(data.location)}</h2>
+      <p class="c-sub">${data.mode === 'semanal' ? 'Conteo semanal' : 'Conteo mensual'} · ${fmtDate(data.finishedAt)} · por ${escapeHtml(data.generatedBy || '—')}</p>
     </div>
     <div class="summary">
-      <div class="summary-hero">
-        <span class="check-icon">${ICONS.checkCircle}</span>
-        <h2>${escapeHtml(data.location)}</h2>
-        <p>${data.mode === 'semanal' ? 'Conteo Semanal' : 'Conteo Mensual'} · ${fmtDate(data.finishedAt)} · Generado por ${escapeHtml(data.generatedBy || '—')}</p>
-      </div>
       ${data.generalNote && data.generalNote.trim() ? `
       <div class="note-summary-block">
         <div class="section-label">Nota</div>
@@ -2012,13 +1997,13 @@ function renderPrices() {
   const missing = PRODUCTS.filter(p => getEffectivePrice(p.code, 'price1') === null && getEffectivePrice(p.code, 'price2') === null).length;
 
   app.innerHTML = `
-    <div class="topbar">
-      <button class="icon-btn" id="backBtn">${ICONS.chevronLeft}</button>
-      <div style="text-align:center;">
-        <h1>Precios</h1>
-        <div class="sub">Precio 1 = Madrid/Málaga/Valencia · Precio 2 = BCN</div>
+    <div class="c-head c-head-count">
+      <div class="c-head-row">
+        <button class="icon-btn" id="backBtn" aria-label="Volver">${ICONS.chevronLeft}</button>
+        <button class="icon-btn" id="priceHistoryBtn" title="Historial de cambios">${ICONS.history || '🕘'}</button>
       </div>
-      <button class="icon-btn" id="priceHistoryBtn" title="Historial de cambios">🕘</button>
+      <h2 class="c-title">Precios</h2>
+      <p class="c-sub">Precio 1 = Madrid, Málaga, Valencia · Precio 2 = BCN</p>
     </div>
     <div class="count-controls">
       <div class="search-wrap">
@@ -2155,10 +2140,13 @@ function renderPriceHistory() {
   `).join('');
 
   app.innerHTML = `
-    <div class="topbar">
-      <button class="icon-btn" id="backBtn">${ICONS.chevronLeft}</button>
-      <h1>Historial de precios</h1>
-      <span style="width:32px"></span>
+    <div class="c-head c-head-count">
+      <div class="c-head-row">
+        <button class="icon-btn" id="backBtn" aria-label="Volver">${ICONS.chevronLeft}</button>
+        
+      </div>
+      <h2 class="c-title">Historial de precios</h2>
+      <p class="c-sub">Cambios registrados en este celular</p>
     </div>
     <div class="home">
       ${hist.length ? `<div class="history-list">${rows}</div>` : `<div class="empty-hint">Todavía no se registraron cambios de precio en este celular.</div>`}
