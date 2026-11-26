@@ -963,6 +963,28 @@ function getFilteredProducts() {
   });
 }
 
+// Vaschetas pesadas una por una: siempre se muestra una casilla vacía al final,
+// así que cuando se carga una aparece la siguiente.
+function heladoPesadasList(detail) {
+  return ((detail && detail.pesadas) || []).filter(n => Number(n) > 0).map(Number);
+}
+
+function heladoTotalKg(detail, pesoProm) {
+  const pesadas = heladoPesadasList(detail).reduce((s, n) => s + n, 0);
+  return Math.round(((detail.vasquetas || 0) * (pesoProm || 0) + (detail.manualKg || 0) + pesadas) * 1000) / 1000;
+}
+
+function heladoPesadasInnerHtml(code, detail) {
+  const list = heladoPesadasList(detail);
+  const sum = list.reduce((s, n) => s + n, 0);
+  const inputs = list.concat(['']).map((v, i) =>
+    `<input type="text" inputmode="decimal" class="helado-input pesada-input" data-vpes="${code}" data-vi="${i}" value="${v === '' ? '' : formatQty(v)}" placeholder="${i + 1}ª" enterkeyhint="next">`
+  ).join('');
+  return `
+    <span class="helado-label">Vaschetas pesadas (kg)${list.length ? ` · ${list.length} = ${formatQty(sum)} kg` : ''}</span>
+    <div class="pesadas-grid">${inputs}</div>`;
+}
+
 function buildProductListHtml(filtered) {
   const counts = activeCounts();
   const isWaste = state.stage === 'desperdicio';
@@ -1033,6 +1055,7 @@ function buildProductListHtml(filtered) {
               <span class="helado-label">Kg manual</span>
               <input type="text" inputmode="decimal" class="helado-input" data-manualkg="${p.code}" value="${detail.manualKg ? formatQty(detail.manualKg) : ''}" placeholder="0">
             </div>
+            <div class="helado-pesadas" data-pesadas-wrap="${p.code}">${heladoPesadasInnerHtml(p.code, detail)}</div>
             <div class="helado-total">Total: <b data-total-label="${p.code}">${formatQty(qty)} kg</b></div>
           </div>`;
         return;
@@ -1276,6 +1299,8 @@ function attachCountRowHandlers() {
     input.onchange = (e) => updateHeladoRow(input.getAttribute('data-pesoprom'), 'pesoProm', e.target.value, e.target);
     input.onfocus = (e) => e.target.select();
   });
+  bindPesadaInputs(document);
+
   document.querySelectorAll('[data-manualkg]').forEach(input => {
     input.onchange = (e) => updateHeladoRow(input.getAttribute('data-manualkg'), 'manualKg', e.target.value, e.target);
     input.onfocus = (e) => e.target.select();
@@ -1349,7 +1374,7 @@ function updateHeladoRow(code, field, rawValue, inputEl) {
   if (bloqueaPeso) current.pesoProm = Number(product.avgWeight);
   details[code] = current;
 
-  const total = (current.vasquetas || 0) * (current.pesoProm || 0) + (current.manualKg || 0);
+  const total = heladoTotalKg(current, current.pesoProm);
   activeCounts()[code] = total;
   saveCurrent();
 
@@ -1362,6 +1387,59 @@ function updateHeladoRow(code, field, rawValue, inputEl) {
     const totalLabel = wrap.querySelector(`[data-total-label="${code}"]`);
     if (totalLabel) totalLabel.textContent = `${formatQty(total)} kg`;
   }
+  updateProgressUI();
+}
+
+function bindPesadaInputs(root) {
+  root.querySelectorAll('[data-vpes]').forEach(input => {
+    input.onfocus = (e) => e.target.select();
+    input.onchange = (e) => updatePesada(input.getAttribute('data-vpes'), Number(input.getAttribute('data-vi')), e.target.value, false);
+    input.onkeydown = (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      input.onchange = null; // evita doble disparo al perder el foco
+      updatePesada(input.getAttribute('data-vpes'), Number(input.getAttribute('data-vi')), input.value, true);
+    };
+  });
+}
+
+function updatePesada(code, idx, rawValue, focusNext) {
+  const details = activeHeladoDetails();
+  const current = details[code] || { vasquetas: 0, pesoProm: 0, manualKg: 0 };
+  const list = heladoPesadasList(current);
+  let value = Math.max(0, parseQtyInput(rawValue));
+  if (value > PESO_PROM_MAX_KG) value = confirmGramsToKg(value, 'el peso de la vaschetta');
+
+  if (value > 0) {
+    if (idx < list.length) list[idx] = value; else list.push(value);
+  } else if (idx < list.length) {
+    list.splice(idx, 1);
+  }
+  current.pesadas = list;
+
+  const product = PRODUCTS.find(p => String(p.code) === String(code));
+  const bloqueaPeso = pesoHeladoBloqueado(state.location) && !!(product && product.avgWeight !== null && product.avgWeight !== undefined);
+  if (bloqueaPeso) current.pesoProm = Number(product.avgWeight);
+  details[code] = current;
+
+  const total = heladoTotalKg(current, current.pesoProm);
+  activeCounts()[code] = total;
+  saveCurrent();
+
+  const wrap = document.querySelector(`[data-pesadas-wrap="${code}"]`);
+  if (wrap) {
+    wrap.innerHTML = heladoPesadasInnerHtml(code, current);
+    bindPesadaInputs(wrap);
+    if (focusNext) {
+      const inputs = wrap.querySelectorAll('[data-vpes]');
+      const target = value > 0 ? inputs[inputs.length - 1] : inputs[Math.min(idx, inputs.length - 1)];
+      if (target) target.focus();
+    }
+  }
+  const row = document.querySelector(`[data-row="${code}"]`);
+  if (row) row.classList.toggle('counted', total > 0);
+  const totalLabel = document.querySelector(`[data-total-label="${code}"]`);
+  if (totalLabel) totalLabel.textContent = `${formatQty(total)} kg`;
   updateProgressUI();
 }
 
